@@ -1,5 +1,5 @@
 package com.training.fxplayer.examples;
 
-public class TestPlayer {
+public class Test {
 
 }

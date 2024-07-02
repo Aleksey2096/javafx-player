@@ -3,6 +3,7 @@ module fxplayer {
 	requires javafx.controls;
 	requires javafx.fxml;
 	requires javafx.media;
+	requires javafx.base;
 
 	opens com.training.fxplayer to javafx.fxml;
 	opens com.training.fxplayer.examples to javafx.fxml;
