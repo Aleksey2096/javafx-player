@@ -1,4 +1,4 @@
-package com.training.fxplayer;
+package com.training.fxplayer.examples;
 
 /*
  * Class-wrapper over class App extending javafx.application.Application,

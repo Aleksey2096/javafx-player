@@ -13,7 +13,7 @@ import javafx.scene.media.MediaView;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-public class Main extends Application {
+public class FullScreenPlayer extends Application {
 
 	public static void main(String[] args) {
 		launch(args);

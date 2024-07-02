@@ -1,4 +1,4 @@
-package com.training.fxplayer;
+package com.training.fxplayer.examples;
 
 import java.io.IOException;
 import javafx.fxml.FXML;
