@@ -1,0 +1,12 @@
+/*
+.button {
+    -fx-text-fill: fuchsia;
+}
+*/
+.root-stack-pane { /* custom class name */
+	-fx-background-color: black;
+}
+
+.slider .track { /* default class names */
+	-fx-background-color: lightgray;
+}
