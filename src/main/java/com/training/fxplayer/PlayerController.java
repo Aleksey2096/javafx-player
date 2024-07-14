@@ -47,6 +47,8 @@ public class PlayerController {
 
 			widthProperty.bind(Bindings.selectDouble(mediaView.sceneProperty(), "width"));
 			hightProperty.bind(Bindings.selectDouble(mediaView.sceneProperty(), "height"));
+			
+			mediaView.setPreserveRatio(true);
 
 			mediaPlayer.currentTimeProperty().addListener(new ChangeListener<Duration>() {
 

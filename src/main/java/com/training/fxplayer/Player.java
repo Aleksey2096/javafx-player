@@ -25,7 +25,7 @@ public class Player extends Application {
 			@Override
 			public void handle(MouseEvent event) {
 				if (event.getClickCount() == 2) {
-					primaryStage.setFullScreen(true);
+					primaryStage.setFullScreen(!primaryStage.isFullScreen());
 				}
 			}
 		});
