@@ -12,12 +12,16 @@ import javafx.stage.Stage;
 
 public class Player extends Application {
 
-	private static final String APP_NAME = "FX Player";
+	public static final String APP_NAME = "FX Player";
 	private static Scene scene;
+
+	private static Stage primaryStage;
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		scene = new Scene(loadFXML("player"));
+		Player.primaryStage = primaryStage;
+
+		scene = new Scene(loadFXML("player"), 960, 540);
 		scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
 
 		scene.setOnMouseClicked(new EventHandler<MouseEvent>() {
@@ -30,13 +34,20 @@ public class Player extends Application {
 			}
 		});
 
-		primaryStage.setTitle(APP_NAME);
+		// To supress "Press ESC to exit full-screen mode." hint
+		primaryStage.setFullScreenExitHint("");
+
+		Player.setAppTitle(APP_NAME);
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
 
 	public static void main(String[] args) {
 		launch();
+	}
+
+	public static void setAppTitle(String title) {
+		primaryStage.setTitle(title);
 	}
 
 	private static Parent loadFXML(String fxmlName) throws IOException {
