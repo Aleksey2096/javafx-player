@@ -15,10 +15,12 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
@@ -31,15 +33,21 @@ public class PlayerController implements Initializable {
 
 	private MediaPlayer mediaPlayer;
 	private boolean isEndOfMedia;
+	private double previousVolume;
+	private boolean isMuted;
 
 	@FXML
 	private MediaView mediaView;
 	@FXML
 	private Slider progressSlider;
 	@FXML
+	private Label volumeLabel;
+	@FXML
 	private Slider volumeSlider;
 	@FXML
 	private Button playButton;
+	@FXML
+	private HBox volumeControlsHBox;
 
 	// ImageViews for the buttons and labels.
 	private ImageView ivPlay;
@@ -62,48 +70,89 @@ public class PlayerController implements Initializable {
 			@Override
 			public void handle(MouseEvent event) {
 				mediaPlayer.seek(Duration.seconds(progressSlider.getValue()));
+
+				// to prevent the media from automatically playing the media if it has already
+				// ended
+				if (isEndOfMedia) {
+					mediaPlayer.pause();
+				}
 			}
 		};
 
 		progressSlider.setOnMousePressed(changedProgressBar);
 		progressSlider.setOnMouseDragged(changedProgressBar);
 
-		volumeSlider.setValue(70);
 		volumeSlider.valueProperty().addListener(new InvalidationListener() {
 			@Override
 			public void invalidated(Observable observable) {
-				mediaPlayer.setVolume(volumeSlider.getValue() / 100);
+				if (mediaPlayer != null) {
+					double newVolume = volumeSlider.getValue();
+					mediaPlayer.setVolume(newVolume);
+
+					if (newVolume != 0.0) {
+						volumeLabel.setGraphic(ivVolume);
+						previousVolume = newVolume;
+						isMuted = false;
+					} else {
+						volumeLabel.setGraphic(ivMute);
+						isMuted = true;
+					}
+				}
 			}
 		});
 
-		// Get the paths of the images and make them into images.
-		Image imagePlay = new Image(
-				new File("src/main/resources/com/training/fxplayer/img/play-btn.png").toURI().toString());
-		ivPlay = new ImageView(imagePlay);
-		ivPlay.setFitWidth(19);
-		ivPlay.setFitHeight(19);
+		volumeLabel.setOnMouseClicked(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent mouseEvent) {
+				if (isMuted) {
+					volumeLabel.setGraphic(ivVolume);
+					volumeSlider.setValue(previousVolume);
+					isMuted = false;
+				} else {
+					volumeLabel.setGraphic(ivMute);
+					volumeSlider.setValue(0);
+					isMuted = true;
+				}
+			}
+		});
 
-		// Button stop image.
-		Image imageStop = new Image(
-				new File("src/main/resources/com/training/fxplayer/img/stop-btn.png").toURI().toString());
-		ivPause = new ImageView(imageStop);
-		ivPause.setFitHeight(19);
-		ivPause.setFitWidth(19);
+		volumeLabel.setOnMouseEntered(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent mouseEvent) {
+				if (!volumeSlider.isVisible()) {
+					volumeSlider.setVisible(true);
+					volumeSlider.setManaged(true);
+				}
+			}
+		});
 
-		// Restart button image.
-		Image imageRestart = new Image(
-				new File("src/main/resources/com/training/fxplayer/img/restart-btn.png").toURI().toString());
-		ivRestart = new ImageView(imageRestart);
-		ivRestart.setFitWidth(19);
-		ivRestart.setFitHeight(19);
+		volumeControlsHBox.setOnMouseExited(new EventHandler<MouseEvent>() {
+			@Override
+			public void handle(MouseEvent mouseEvent) {
+				volumeSlider.setVisible(false);
+				volumeSlider.setManaged(false);
+			}
+		});
+
+		bindControlsImages();
 
 		/*
 		 * SET THE DEFAULTS
 		 */
 
+		previousVolume = 0.7;
+		isMuted = false;
+		volumeSlider.setValue(previousVolume);
+
 		playButton.setGraphic(ivPlay);
 		playButton.setDisable(true);
 		isEndOfMedia = false;
+
+		volumeLabel.setGraphic(ivVolume);
+		volumeLabel.setDisable(true);
+
+		volumeSlider.setVisible(false);
+		volumeSlider.setManaged(false);
 	}
 
 	@FXML
@@ -120,6 +169,10 @@ public class PlayerController implements Initializable {
 				public void changed(ObservableValue<? extends Duration> observable, Duration oldValue,
 						Duration newValue) {
 					progressSlider.setValue(newValue.toSeconds());
+					if (newValue.toSeconds() < media.getDuration().toSeconds() && isEndOfMedia) {
+						playButton.setGraphic(ivPlay);
+						isEndOfMedia = false;
+					}
 				}
 			});
 
@@ -142,6 +195,8 @@ public class PlayerController implements Initializable {
 			mediaPlayer.play();
 			playButton.setGraphic(ivPause);
 			playButton.setDisable(false);
+			volumeLabel.setGraphic(ivVolume);
+			volumeLabel.setDisable(false);
 		}
 	}
 
@@ -169,5 +224,43 @@ public class PlayerController implements Initializable {
 	@FXML
 	public void back10(ActionEvent event) {
 		mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(-10)));
+	}
+
+	private void bindControlsImages() {
+
+		// Get the paths of the images and make them into images.
+		Image imagePlay = new Image(
+				new File("src/main/resources/com/training/fxplayer/img/play-btn.png").toURI().toString());
+		ivPlay = new ImageView(imagePlay);
+		ivPlay.setFitWidth(19);
+		ivPlay.setFitHeight(19);
+
+		// Button stop image.
+		Image imageStop = new Image(
+				new File("src/main/resources/com/training/fxplayer/img/stop-btn.png").toURI().toString());
+		ivPause = new ImageView(imageStop);
+		ivPause.setFitHeight(19);
+		ivPause.setFitWidth(19);
+
+		// Restart button image.
+		Image imageRestart = new Image(
+				new File("src/main/resources/com/training/fxplayer/img/restart-btn.png").toURI().toString());
+		ivRestart = new ImageView(imageRestart);
+		ivRestart.setFitWidth(19);
+		ivRestart.setFitHeight(19);
+
+		// Muted speaker image.
+		Image imageMute = new Image(
+				new File("src/main/resources/com/training/fxplayer/img/mute.png").toURI().toString());
+		ivMute = new ImageView(imageMute);
+		ivMute.setFitWidth(19);
+		ivMute.setFitHeight(19);
+
+		// Unmuted speaker image.
+		Image imageVol = new Image(
+				new File("src/main/resources/com/training/fxplayer/img/volume.png").toURI().toString());
+		ivVolume = new ImageView(imageVol);
+		ivVolume.setFitWidth(19);
+		ivVolume.setFitHeight(19);
 	}
 }
