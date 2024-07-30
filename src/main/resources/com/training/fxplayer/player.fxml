@@ -14,20 +14,20 @@
       <MediaView fx:id="mediaView" fitHeight="200.0" fitWidth="200.0" />
       <VBox alignment="BOTTOM_CENTER" prefHeight="200.0" prefWidth="100.0">
          <children>
-            <Slider fx:id="progressSlider">
+            <Slider fx:id="progressSlider" style="-fx-cursor: hand;">
                <VBox.margin>
                   <Insets left="10.0" right="10.0" />
                </VBox.margin>
             </Slider>
-            <HBox prefHeight="30.0" prefWidth="200.0">
+            <HBox alignment="CENTER" prefHeight="30.0" prefWidth="200.0">
                <children>
-                  <Button fx:id="playButton" mnemonicParsing="false" onAction="#playPause" />
-                  <Button mnemonicParsing="false" onAction="#back10" text="-10s" />
-                  <Button mnemonicParsing="false" onAction="#skip30" text="+30s" />
-                  <HBox fx:id="volumeControlsHBox" prefHeight="100.0" prefWidth="200.0">
+                  <Button fx:id="playButton" mnemonicParsing="false" onAction="#playPause" style="-fx-cursor: hand;" />
+                  <Button mnemonicParsing="false" onAction="#back10" text="-10s" style="-fx-cursor: hand;" />
+                  <Button mnemonicParsing="false" onAction="#skip30" text="+30s" style="-fx-cursor: hand;" />
+                  <HBox fx:id="volumeControlsHBox" alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
                      <children>
-                        <Label fx:id="volumeLabel" />
-                        <Slider fx:id="volumeSlider" blockIncrement="0.1" max="1.0">
+                        <Label fx:id="volumeLabel" style="-fx-cursor: hand;" />
+                        <Slider fx:id="volumeSlider" blockIncrement="0.1" max="1.0" style="-fx-cursor: hand;">
                            <HBox.margin>
                               <Insets left="10.0" />
                            </HBox.margin>
@@ -36,7 +36,9 @@
                   </HBox>
                   <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
                      <children>
-                        <Button contentDisplay="CENTER" mnemonicParsing="false" onAction="#chooseFile" text="ChooseFile" />
+                     	<Label fx:id="currentTimeLabel" />
+                     	<Label fx:id="durationLabel" />
+                        <Button contentDisplay="CENTER" mnemonicParsing="false" onAction="#chooseFile" text="ChooseFile" style="-fx-cursor: hand;" />
                      </children>
                   </HBox>
                </children>

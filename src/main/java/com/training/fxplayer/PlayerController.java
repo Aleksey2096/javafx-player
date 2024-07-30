@@ -47,6 +47,10 @@ public class PlayerController implements Initializable {
 	@FXML
 	private Button playButton;
 	@FXML
+	private Label currentTimeLabel;
+	@FXML
+	private Label durationLabel;
+	@FXML
 	private HBox volumeControlsHBox;
 
 	// ImageViews for the buttons and labels.
@@ -197,6 +201,16 @@ public class PlayerController implements Initializable {
 			playButton.setDisable(false);
 			volumeLabel.setGraphic(ivVolume);
 			volumeLabel.setDisable(false);
+
+			mediaPlayer.currentTimeProperty().addListener((observable, oldValue, newValue) -> {
+				Duration currentTime = mediaPlayer.getCurrentTime();
+				currentTimeLabel.setText(formatTime(currentTime) + " / ");
+			});
+
+			mediaPlayer.totalDurationProperty().addListener((observable, oldValue, newValue) -> {
+				Duration totalDuration = mediaPlayer.getTotalDuration();
+				durationLabel.setText(formatTime(totalDuration));
+			});
 		}
 	}
 
@@ -262,5 +276,21 @@ public class PlayerController implements Initializable {
 		ivVolume = new ImageView(imageVol);
 		ivVolume.setFitWidth(19);
 		ivVolume.setFitHeight(19);
+	}
+
+	private String formatTime(Duration duration) {
+		int hours = (int) duration.toHours();
+		int minutes = (int) duration.toMinutes() % 60;
+		int seconds = (int) duration.toSeconds() % 60;
+
+		String time;
+		if (hours > 0) {
+			time = String.format("%d:%02d:%02d", hours, minutes, seconds);
+		} else if (minutes > 0) {
+			time = String.format("%d:%02d", minutes, seconds);
+		} else {
+			time = String.format("%d", seconds);
+		}
+		return time;
 	}
 }
