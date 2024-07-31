@@ -9,10 +9,10 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.media.MediaView?>
 
-<StackPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" styleClass="root-stack-pane" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.training.fxplayer.PlayerController">
+<StackPane fx:id="stackPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" styleClass="root-stack-pane" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.training.fxplayer.PlayerController">
    <children>
       <MediaView fx:id="mediaView" fitHeight="200.0" fitWidth="200.0" />
-      <VBox alignment="BOTTOM_CENTER" prefHeight="200.0" prefWidth="100.0">
+      <VBox fx:id="controlsBox" alignment="BOTTOM_CENTER" prefHeight="200.0" prefWidth="100.0">
          <children>
             <Slider fx:id="progressSlider" style="-fx-cursor: hand;">
                <VBox.margin>
@@ -21,12 +21,12 @@
             </Slider>
             <HBox alignment="CENTER" prefHeight="30.0" prefWidth="200.0">
                <children>
-                  <Button fx:id="playButton" mnemonicParsing="false" onAction="#playPause" style="-fx-cursor: hand;" />
+                  <Button fx:id="playButton" styleClass="transparent-button" mnemonicParsing="false" onAction="#playPause" style="-fx-cursor: hand;" />
                   <Button mnemonicParsing="false" onAction="#back10" text="-10s" style="-fx-cursor: hand;" />
                   <Button mnemonicParsing="false" onAction="#skip30" text="+30s" style="-fx-cursor: hand;" />
                   <HBox fx:id="volumeControlsHBox" alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
                      <children>
-                        <Label fx:id="volumeLabel" style="-fx-cursor: hand;" />
+                     	<Button fx:id="volumeButton" styleClass="transparent-button" mnemonicParsing="false" style="-fx-cursor: hand;" />
                         <Slider fx:id="volumeSlider" blockIncrement="0.1" max="1.0" style="-fx-cursor: hand;">
                            <HBox.margin>
                               <Insets left="10.0" />

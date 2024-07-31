@@ -10,3 +10,8 @@
 .slider .track { /* default class names */
 	-fx-background-color: lightgray;
 }
+
+.transparent-button { /* custom class name */
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}

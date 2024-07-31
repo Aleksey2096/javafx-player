@@ -3,11 +3,9 @@ package com.training.fxplayer;
 import java.io.IOException;
 
 import javafx.application.Application;
-import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 public class Player extends Application {
@@ -24,16 +22,6 @@ public class Player extends Application {
 		scene = new Scene(loadFXML("player"), 960, 540);
 		scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
 
-		scene.setOnMouseClicked(new EventHandler<MouseEvent>() {
-
-			@Override
-			public void handle(MouseEvent event) {
-				if (event.getClickCount() == 2) {
-					primaryStage.setFullScreen(!primaryStage.isFullScreen());
-				}
-			}
-		});
-
 		// To supress "Press ESC to exit full-screen mode." hint
 		primaryStage.setFullScreenExitHint("");
 
@@ -48,6 +36,10 @@ public class Player extends Application {
 
 	public static void setAppTitle(String title) {
 		primaryStage.setTitle(title);
+	}
+
+	public static void toggleFullScreen() {
+		primaryStage.setFullScreen(!primaryStage.isFullScreen());
 	}
 
 	private static Parent loadFXML(String fxmlName) throws IOException {
