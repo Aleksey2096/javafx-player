@@ -22,23 +22,19 @@
             <HBox alignment="CENTER" prefHeight="30.0" prefWidth="200.0">
                <children>
                   <Button fx:id="playButton" styleClass="transparent-button" mnemonicParsing="false" onAction="#playPause" style="-fx-cursor: hand;" />
-                  <Button mnemonicParsing="false" onAction="#back10" text="-10s" style="-fx-cursor: hand;" />
-                  <Button mnemonicParsing="false" onAction="#skip30" text="+30s" style="-fx-cursor: hand;" />
+                  <Button fx:id="replay10Button" styleClass="transparent-button" mnemonicParsing="false" onAction="#replay10" style="-fx-cursor: hand;" />
+                  <Button fx:id="forward30Button" styleClass="transparent-button" mnemonicParsing="false" onAction="#forward30" style="-fx-cursor: hand;" />
                   <HBox fx:id="volumeControlsHBox" alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
                      <children>
                      	<Button fx:id="volumeButton" styleClass="transparent-button" mnemonicParsing="false" style="-fx-cursor: hand;" />
-                        <Slider fx:id="volumeSlider" blockIncrement="0.1" max="1.0" style="-fx-cursor: hand;">
-                           <HBox.margin>
-                              <Insets left="10.0" />
-                           </HBox.margin>
-                        </Slider>
+                        <Slider fx:id="volumeSlider" blockIncrement="0.1" max="1.0" style="-fx-cursor: hand;" />
                      </children>
                   </HBox>
                   <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
                      <children>
-                     	<Label fx:id="currentTimeLabel" />
-                     	<Label fx:id="durationLabel" />
-                        <Button contentDisplay="CENTER" mnemonicParsing="false" onAction="#chooseFile" text="ChooseFile" style="-fx-cursor: hand;" />
+                     	<Label fx:id="currentTimeLabel" styleClass="time-label" />
+                     	<Label fx:id="durationLabel" styleClass="time-label" />
+                        <Button fx:id="openFileButton" styleClass="transparent-button" contentDisplay="CENTER" mnemonicParsing="false" onAction="#openFile" style="-fx-cursor: hand;" />
                      </children>
                   </HBox>
                </children>

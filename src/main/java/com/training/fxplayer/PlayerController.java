@@ -4,6 +4,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.animation.PauseTransition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.event.ActionEvent;
@@ -27,6 +28,8 @@ import javafx.util.Duration;
 
 public class PlayerController implements Initializable {
 
+	// Delay to distinguish between single and double click
+	private static final PauseTransition PAUSE_TRANSITION = new PauseTransition(Duration.millis(200));
 	private static final FileChooser FILE_CHOOSER = new FileChooser();
 
 	private MediaPlayer mediaPlayer;
@@ -43,11 +46,17 @@ public class PlayerController implements Initializable {
 	@FXML
 	private Slider progressSlider;
 	@FXML
-	private Button volumeButton;
-	@FXML
 	private Slider volumeSlider;
 	@FXML
 	private Button playButton;
+	@FXML
+	private Button volumeButton;
+	@FXML
+	private Button replay10Button;
+	@FXML
+	private Button forward30Button;
+	@FXML
+	private Button openFileButton;
 	@FXML
 	private Label currentTimeLabel;
 	@FXML
@@ -61,6 +70,9 @@ public class PlayerController implements Initializable {
 	private ImageView ivRestart;
 	private ImageView ivVolume;
 	private ImageView ivMute;
+	private ImageView ivForward30;
+	private ImageView ivReplay10;
+	private ImageView ivOpenFile;
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
@@ -73,10 +85,16 @@ public class PlayerController implements Initializable {
 		mediaView.setPreserveRatio(true);
 
 		stackPane.setOnMouseClicked(event -> {
-			if (event.getClickCount() == 2) {
+			if (event.getClickCount() == 1) {
+				// Handle single click with a delay
+				PAUSE_TRANSITION.setOnFinished(e -> {
+					toggleControlsBarVisibility();
+				});
+				PAUSE_TRANSITION.play();
+			} else if (event.getClickCount() == 2) {
+				// Handle double click immediately
+				PAUSE_TRANSITION.stop(); // Stop the pause transition if a double click is detected
 				Player.toggleFullScreen();
-			} else if (event.getClickCount() == 1) {
-				toggleControlsBarVisibility();
 			}
 		});
 
@@ -146,15 +164,25 @@ public class PlayerController implements Initializable {
 		playButton.setDisable(true);
 		isEndOfMedia = false;
 
+		replay10Button.setGraphic(ivReplay10);
+		replay10Button.setDisable(true);
+
+		forward30Button.setGraphic(ivForward30);
+		forward30Button.setDisable(true);
+
 		volumeButton.setGraphic(ivVolume);
 		volumeButton.setDisable(true);
 
+		openFileButton.setGraphic(ivOpenFile);
+
 		volumeSlider.setVisible(false);
 		volumeSlider.setManaged(false);
+
+		progressSlider.setDisable(true);
 	}
 
 	@FXML
-	public void chooseFile(ActionEvent event) {
+	public void openFile(ActionEvent event) {
 		File file = FILE_CHOOSER.showOpenDialog(null);
 
 		if (file != null) {
@@ -177,6 +205,9 @@ public class PlayerController implements Initializable {
 			playButton.setDisable(false);
 			volumeButton.setGraphic(ivVolume);
 			volumeButton.setDisable(false);
+			progressSlider.setDisable(false);
+			replay10Button.setDisable(false);
+			forward30Button.setDisable(false);
 
 			mediaPlayer.currentTimeProperty().addListener((observable, oldValue, newValue) -> {
 				currentTimeLabel.setText(formatTime(mediaPlayer.getCurrentTime()) + " / ");
@@ -214,51 +245,74 @@ public class PlayerController implements Initializable {
 	}
 
 	@FXML
-	public void skip30(ActionEvent event) {
+	public void forward30(ActionEvent event) {
 		mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(30)));
 	}
 
 	@FXML
-	public void back10(ActionEvent event) {
+	public void replay10(ActionEvent event) {
 		mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(-10)));
 	}
 
 	private void bindControlsImages() {
 
 		// Get the paths of the images and make them into images.
+
+		// Button play image
 		Image imagePlay = new Image(
-				new File("src/main/resources/com/training/fxplayer/img/play-btn.png").toURI().toString());
+				new File("src/main/resources/com/training/fxplayer/img/play.png").toURI().toString());
 		ivPlay = new ImageView(imagePlay);
-		ivPlay.setFitWidth(19);
-		ivPlay.setFitHeight(19);
+		ivPlay.setFitWidth(25);
+		ivPlay.setFitHeight(25);
 
-		// Button stop image.
-		Image imageStop = new Image(
-				new File("src/main/resources/com/training/fxplayer/img/stop-btn.png").toURI().toString());
-		ivPause = new ImageView(imageStop);
-		ivPause.setFitHeight(19);
-		ivPause.setFitWidth(19);
+		// Button pause image.
+		Image imagePause = new Image(
+				new File("src/main/resources/com/training/fxplayer/img/pause.png").toURI().toString());
+		ivPause = new ImageView(imagePause);
+		ivPause.setFitHeight(25);
+		ivPause.setFitWidth(25);
 
-		// Restart button image.
+		// Button restart image.
 		Image imageRestart = new Image(
-				new File("src/main/resources/com/training/fxplayer/img/restart-btn.png").toURI().toString());
+				new File("src/main/resources/com/training/fxplayer/img/restart.png").toURI().toString());
 		ivRestart = new ImageView(imageRestart);
-		ivRestart.setFitWidth(19);
-		ivRestart.setFitHeight(19);
+		ivRestart.setFitWidth(25);
+		ivRestart.setFitHeight(25);
 
-		// Muted speaker image.
+		// Button mute image.
 		Image imageMute = new Image(
 				new File("src/main/resources/com/training/fxplayer/img/mute.png").toURI().toString());
 		ivMute = new ImageView(imageMute);
-		ivMute.setFitWidth(19);
-		ivMute.setFitHeight(19);
+		ivMute.setFitWidth(25);
+		ivMute.setFitHeight(25);
 
-		// Unmuted speaker image.
-		Image imageVol = new Image(
+		// Button volume image.
+		Image imageVolume = new Image(
 				new File("src/main/resources/com/training/fxplayer/img/volume.png").toURI().toString());
-		ivVolume = new ImageView(imageVol);
-		ivVolume.setFitWidth(19);
-		ivVolume.setFitHeight(19);
+		ivVolume = new ImageView(imageVolume);
+		ivVolume.setFitWidth(25);
+		ivVolume.setFitHeight(25);
+
+		// Button forward_30 image.
+		Image imageForward30 = new Image(
+				new File("src/main/resources/com/training/fxplayer/img/forward30.png").toURI().toString());
+		ivForward30 = new ImageView(imageForward30);
+		ivForward30.setFitWidth(25);
+		ivForward30.setFitHeight(25);
+
+		// Button replay_10 image.
+		Image imageReplay10 = new Image(
+				new File("src/main/resources/com/training/fxplayer/img/replay10.png").toURI().toString());
+		ivReplay10 = new ImageView(imageReplay10);
+		ivReplay10.setFitWidth(25);
+		ivReplay10.setFitHeight(25);
+
+		// Button open_file image.
+		Image imageOpenFile = new Image(
+				new File("src/main/resources/com/training/fxplayer/img/openFile.png").toURI().toString());
+		ivOpenFile = new ImageView(imageOpenFile);
+		ivOpenFile.setFitWidth(25);
+		ivOpenFile.setFitHeight(25);
 	}
 
 	private String formatTime(Duration duration) {
