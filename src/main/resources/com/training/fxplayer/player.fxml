@@ -9,24 +9,24 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.media.MediaView?>
 
-<StackPane fx:id="stackPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" styleClass="root-stack-pane" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.training.fxplayer.PlayerController">
+<StackPane fx:id="stackPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#handleStackPaneClick" prefHeight="400.0" prefWidth="600.0" styleClass="root-stack-pane" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.training.fxplayer.PlayerController">
    <children>
       <MediaView fx:id="mediaView" fitHeight="200.0" fitWidth="200.0" />
       <VBox fx:id="controlsBox" alignment="BOTTOM_CENTER" prefHeight="200.0" prefWidth="100.0">
          <children>
-            <Slider fx:id="progressSlider" style="-fx-cursor: hand;">
+            <Slider fx:id="progressSlider" onMouseDragged="#handleProgressSliderOnMousePressedAndDragged" onMousePressed="#handleProgressSliderOnMousePressedAndDragged" style="-fx-cursor: hand;">
                <VBox.margin>
                   <Insets left="10.0" right="10.0" />
                </VBox.margin>
             </Slider>
             <HBox alignment="CENTER" prefHeight="30.0" prefWidth="200.0">
                <children>
-                  <Button fx:id="playButton" styleClass="transparent-button" mnemonicParsing="false" onAction="#playPause" style="-fx-cursor: hand;" />
-                  <Button fx:id="replay10Button" styleClass="transparent-button" mnemonicParsing="false" onAction="#replay10" style="-fx-cursor: hand;" />
-                  <Button fx:id="forward30Button" styleClass="transparent-button" mnemonicParsing="false" onAction="#forward30" style="-fx-cursor: hand;" />
-                  <HBox fx:id="volumeControlsHBox" alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
+                  <Button fx:id="playButton" mnemonicParsing="false" onAction="#handlePlayButtonClick" style="-fx-cursor: hand;" styleClass="transparent-button" />
+                  <Button fx:id="replay10Button" mnemonicParsing="false" onAction="#handleReplay10ButtonClick" style="-fx-cursor: hand;" styleClass="transparent-button" />
+                  <Button fx:id="forward30Button" mnemonicParsing="false" onAction="#handleForward30ButtonClick" style="-fx-cursor: hand;" styleClass="transparent-button" />
+                  <HBox fx:id="volumeControlsHBox" alignment="CENTER_LEFT" onMouseExited="#handleMouseExitingVolumeControlsHBox" prefHeight="100.0" prefWidth="200.0">
                      <children>
-                     	<Button fx:id="volumeButton" styleClass="transparent-button" mnemonicParsing="false" style="-fx-cursor: hand;" />
+                     	<Button fx:id="volumeButton" mnemonicParsing="false" onAction="#handleVolumeButtonClick" onMouseEntered="#handleMouseEnteringVolumeButton" style="-fx-cursor: hand;" styleClass="transparent-button" />
                         <Slider fx:id="volumeSlider" blockIncrement="0.1" max="1.0" style="-fx-cursor: hand;" />
                      </children>
                   </HBox>
@@ -34,7 +34,7 @@
                      <children>
                      	<Label fx:id="currentTimeLabel" styleClass="time-label" />
                      	<Label fx:id="durationLabel" styleClass="time-label" />
-                        <Button fx:id="openFileButton" styleClass="transparent-button" contentDisplay="CENTER" mnemonicParsing="false" onAction="#openFile" style="-fx-cursor: hand;" />
+                        <Button fx:id="openFileButton" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleOpenFileButtonClick" style="-fx-cursor: hand;" styleClass="transparent-button" />
                      </children>
                   </HBox>
                </children>

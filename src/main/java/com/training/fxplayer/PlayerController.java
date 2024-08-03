@@ -8,7 +8,6 @@ import javafx.animation.PauseTransition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -84,32 +83,6 @@ public class PlayerController implements Initializable {
 
 		mediaView.setPreserveRatio(true);
 
-		stackPane.setOnMouseClicked(event -> {
-			if (event.getClickCount() == 1) {
-				// Handle single click with a delay
-				PAUSE_TRANSITION.setOnFinished(e -> {
-					toggleControlsBarVisibility();
-				});
-				PAUSE_TRANSITION.play();
-			} else if (event.getClickCount() == 2) {
-				// Handle double click immediately
-				PAUSE_TRANSITION.stop(); // Stop the pause transition if a double click is detected
-				Player.toggleFullScreen();
-			}
-		});
-
-		EventHandler<MouseEvent> changedProgressBar = event -> {
-			mediaPlayer.seek(Duration.seconds(progressSlider.getValue()));
-
-			// to prevent the media from automatically playing if it has already ended
-			if (isEndOfMedia) {
-				mediaPlayer.pause();
-			}
-		};
-
-		progressSlider.setOnMousePressed(changedProgressBar);
-		progressSlider.setOnMouseDragged(changedProgressBar);
-
 		volumeSlider.valueProperty().addListener(observable -> {
 			if (mediaPlayer != null) {
 				double newVolume = volumeSlider.getValue();
@@ -124,30 +97,6 @@ public class PlayerController implements Initializable {
 					isMuted = true;
 				}
 			}
-		});
-
-		volumeButton.setOnMouseClicked(event -> {
-			if (isMuted) {
-				volumeButton.setGraphic(ivVolume);
-				volumeSlider.setValue(previousVolume);
-				isMuted = false;
-			} else {
-				volumeButton.setGraphic(ivMute);
-				volumeSlider.setValue(0);
-				isMuted = true;
-			}
-		});
-
-		volumeButton.setOnMouseEntered(event -> {
-			if (!volumeSlider.isVisible()) {
-				volumeSlider.setVisible(true);
-				volumeSlider.setManaged(true);
-			}
-		});
-
-		volumeControlsHBox.setOnMouseExited(event -> {
-			volumeSlider.setVisible(false);
-			volumeSlider.setManaged(false);
 		});
 
 		bindControlsImages();
@@ -182,7 +131,7 @@ public class PlayerController implements Initializable {
 	}
 
 	@FXML
-	public void openFile(ActionEvent event) {
+	public void handleOpenFileButtonClick(ActionEvent event) {
 		File file = FILE_CHOOSER.showOpenDialog(null);
 
 		if (file != null) {
@@ -228,8 +177,10 @@ public class PlayerController implements Initializable {
 		}
 	}
 
+	// on mouse click on play/pause/restart button <.setOnMouseClicked(event ->
+	// {...});>
 	@FXML
-	public void playPause(ActionEvent event) {
+	public void handlePlayButtonClick(ActionEvent event) {
 		if (isEndOfMedia) {
 			isEndOfMedia = false;
 			mediaPlayer.seek(Duration.ZERO);
@@ -244,14 +195,74 @@ public class PlayerController implements Initializable {
 		}
 	}
 
+	// <.setOnMouseClicked(event -> {...});>
 	@FXML
-	public void forward30(ActionEvent event) {
+	public void handleForward30ButtonClick(ActionEvent event) {
 		mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(30)));
 	}
 
+	// <.setOnMouseClicked(event -> {...});>
 	@FXML
-	public void replay10(ActionEvent event) {
+	public void handleReplay10ButtonClick(ActionEvent event) {
 		mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(-10)));
+	}
+
+	// on mouse click on volume/mute button <.setOnMouseClicked(event -> {...});>
+	@FXML
+	public void handleVolumeButtonClick(ActionEvent event) {
+		if (isMuted) {
+			volumeButton.setGraphic(ivVolume);
+			volumeSlider.setValue(previousVolume);
+			isMuted = false;
+		} else {
+			volumeButton.setGraphic(ivMute);
+			volumeSlider.setValue(0);
+			isMuted = true;
+		}
+	}
+
+	// <.setOnMouseEntered(event -> {...});>
+	@FXML
+	public void handleMouseEnteringVolumeButton(MouseEvent event) {
+		if (!volumeSlider.isVisible()) {
+			volumeSlider.setVisible(true);
+			volumeSlider.setManaged(true);
+		}
+	}
+
+	// <.setOnMouseExited(event -> {...});>
+	@FXML
+	public void handleMouseExitingVolumeControlsHBox(MouseEvent event) {
+		volumeSlider.setVisible(false);
+		volumeSlider.setManaged(false);
+	}
+
+	// <.setOnMousePressed(event -> {...});> and <.setOnMouseDragged(event ->
+	// {...});>
+	@FXML
+	public void handleProgressSliderOnMousePressedAndDragged(MouseEvent event) {
+		mediaPlayer.seek(Duration.seconds(progressSlider.getValue()));
+
+		// to prevent the media from automatically playing if it has already ended
+		if (isEndOfMedia) {
+			mediaPlayer.pause();
+		}
+	}
+
+	// <.setOnMouseClicked(event -> {...});>
+	@FXML
+	public void handleStackPaneClick(MouseEvent event) {
+		if (event.getClickCount() == 1) {
+			// Handle single click with a delay
+			PAUSE_TRANSITION.setOnFinished(e -> {
+				toggleControlsBarVisibility();
+			});
+			PAUSE_TRANSITION.play();
+		} else if (event.getClickCount() == 2) {
+			// Handle double click immediately
+			PAUSE_TRANSITION.stop(); // Stop the pause transition if a double click is detected
+			Player.toggleFullScreen();
+		}
 	}
 
 	private void bindControlsImages() {
