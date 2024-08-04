@@ -7,6 +7,12 @@ import javafx.stage.Stage;
 
 public class Player extends Application {
 
+	/*
+	 * TODO: 1. close media player before opening next media file 2. add filters to
+	 * FILE_CHOOSER (file types, default directory) 3. show album covers for music
+	 * files 4. open associated files using executable of this app
+	 */
+
 	public static final String APP_NAME = "FX Player";
 
 	private static Scene scene;
