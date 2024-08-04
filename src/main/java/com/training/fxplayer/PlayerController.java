@@ -15,6 +15,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -132,7 +133,7 @@ public class PlayerController implements Initializable {
 
 	@FXML
 	public void handleOpenFileButtonClick(ActionEvent event) {
-		File file = FILE_CHOOSER.showOpenDialog(null);
+		File file = FILE_CHOOSER.showOpenDialog(Player.getPrimaryStage());
 
 		if (file != null) {
 			Media media = new Media(file.toURI().toString());
@@ -181,18 +182,7 @@ public class PlayerController implements Initializable {
 	// {...});>
 	@FXML
 	public void handlePlayButtonClick(ActionEvent event) {
-		if (isEndOfMedia) {
-			isEndOfMedia = false;
-			mediaPlayer.seek(Duration.ZERO);
-			mediaPlayer.play();
-			playButton.setGraphic(ivPause);
-		} else if (mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
-			mediaPlayer.pause();
-			playButton.setGraphic(ivPlay);
-		} else {
-			mediaPlayer.play();
-			playButton.setGraphic(ivPause);
-		}
+		handlePlayButtonClick();
 	}
 
 	// <.setOnMouseClicked(event -> {...});>
@@ -263,6 +253,21 @@ public class PlayerController implements Initializable {
 			PAUSE_TRANSITION.stop(); // Stop the pause transition if a double click is detected
 			Player.toggleFullScreen();
 		}
+	}
+
+	public void handleKeyPresses() {
+		stackPane.getScene().addEventFilter(KeyEvent.KEY_PRESSED, keyEvent -> {
+			switch (keyEvent.getCode()) {
+			case F11 -> Player.toggleFullScreen();
+			case UP -> setControlsBarVisibility(true);
+			case DOWN -> setControlsBarVisibility(false);
+			case LEFT -> adjustPlaybackBySeconds(-60);
+			case RIGHT -> adjustPlaybackBySeconds(60);
+			case SPACE -> handlePlayButtonClick();
+			default -> {
+			}
+			}
+		});
 	}
 
 	private void bindControlsImages() {
@@ -341,5 +346,31 @@ public class PlayerController implements Initializable {
 	private void toggleControlsBarVisibility() {
 		controlsBox.setVisible(!controlsBox.isVisible());
 		controlsBox.setManaged(!controlsBox.isManaged());
+	}
+
+	private void setControlsBarVisibility(boolean isVisible) {
+		controlsBox.setVisible(isVisible);
+		controlsBox.setManaged(isVisible);
+	}
+
+	private void adjustPlaybackBySeconds(int seconds) {
+		if (mediaPlayer != null) {
+			mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(seconds)));
+		}
+	}
+
+	private void handlePlayButtonClick() {
+		if (isEndOfMedia) {
+			isEndOfMedia = false;
+			mediaPlayer.seek(Duration.ZERO);
+			mediaPlayer.play();
+			playButton.setGraphic(ivPause);
+		} else if (mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
+			mediaPlayer.pause();
+			playButton.setGraphic(ivPlay);
+		} else {
+			mediaPlayer.play();
+			playButton.setGraphic(ivPause);
+		}
 	}
 }
