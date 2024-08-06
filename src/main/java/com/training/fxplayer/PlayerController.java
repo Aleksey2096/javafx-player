@@ -28,6 +28,21 @@ import javafx.util.Duration;
 
 public class PlayerController implements Initializable {
 
+	private static final String INITIAL_DIRECTORY = "D:/My documents/Downloads";
+	private static final String EXTENSION_FILTER_DESCRIPTION = "Video and Music Files";
+	private static final String[] SUPPORTED_EXTENSIONS = { "*.mp4", "*.flv", "*.mp3", "*.m4a" };
+	private static final String FULL_TIME_FORMAT = "%d:%02d:%02d";
+	private static final String SHORT_TIME_FORMAT = "%d:%02d";
+	private static final int NUMBER_OF_MINUTES_IN_HOUR = 60;
+	private static final int DEFAULT_ICON_SIZE = 25;
+	private static final double INITIAL_VOLUME = 0.7;
+	private static final int LEFT_BUTTON_PLAYBACK_ADJUSTMENT = -60;
+	private static final int RIGHT_BUTTON_PLAYBACK_ADJUSTMENT = 60;
+	private static final int REPLAY10_BUTTON_PLAYBACK_ADJUSTMENT = -10;
+	private static final int FORWARD30_BUTTON_PLAYBACK_ADJUSTMENT = 30;
+	private static final String APP_TITLE_FORMAT = "%s - %s";
+	private static final String CURRENT_TOTAL_TIME_DELIMITER = " / ";
+
 	// Delay to distinguish between single and double click
 	private static final PauseTransition PAUSE_TRANSITION = new PauseTransition(Duration.millis(200));
 	private static final FileChooser FILE_CHOOSER = new FileChooser();
@@ -76,6 +91,9 @@ public class PlayerController implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+
+		configureFileChooser();
+
 		DoubleProperty widthProperty = mediaView.fitWidthProperty();
 		DoubleProperty hightProperty = mediaView.fitHeightProperty();
 
@@ -106,7 +124,7 @@ public class PlayerController implements Initializable {
 		 * SET THE DEFAULTS
 		 */
 
-		previousVolume = 0.7;
+		previousVolume = INITIAL_VOLUME;
 		isMuted = false;
 		volumeSlider.setValue(previousVolume);
 
@@ -136,6 +154,8 @@ public class PlayerController implements Initializable {
 		File file = FILE_CHOOSER.showOpenDialog(Player.getPrimaryStage());
 
 		if (file != null) {
+			releaseCurrentMediaPlayer();
+
 			Media media = new Media(file.toURI().toString());
 			mediaPlayer = new MediaPlayer(media);
 			mediaView.setMediaPlayer(mediaPlayer);
@@ -149,18 +169,8 @@ public class PlayerController implements Initializable {
 				isEndOfMedia = true;
 			});
 
-			Player.setAppTitle(String.format("%s - %s", Player.APP_NAME, file.getName()));
-			mediaPlayer.play();
-			playButton.setGraphic(ivPause);
-			playButton.setDisable(false);
-			volumeButton.setGraphic(ivVolume);
-			volumeButton.setDisable(false);
-			progressSlider.setDisable(false);
-			replay10Button.setDisable(false);
-			forward30Button.setDisable(false);
-
 			mediaPlayer.currentTimeProperty().addListener((observable, oldValue, newValue) -> {
-				currentTimeLabel.setText(formatTime(mediaPlayer.getCurrentTime()) + " / ");
+				currentTimeLabel.setText(formatTime(mediaPlayer.getCurrentTime()) + CURRENT_TOTAL_TIME_DELIMITER);
 
 				progressSlider.setValue(newValue.toSeconds());
 
@@ -175,6 +185,18 @@ public class PlayerController implements Initializable {
 			mediaPlayer.totalDurationProperty().addListener((observable, oldValue, newValue) -> {
 				durationLabel.setText(formatTime(mediaPlayer.getTotalDuration()));
 			});
+
+			Player.setAppTitle(String.format(APP_TITLE_FORMAT, Player.APP_NAME, file.getName()));
+			playButton.setGraphic(ivPause);
+			playButton.setDisable(false);
+			volumeButton.setGraphic(ivVolume);
+			volumeButton.setDisable(false);
+			progressSlider.setDisable(false);
+			replay10Button.setDisable(false);
+			forward30Button.setDisable(false);
+
+			mediaPlayer.setVolume(previousVolume);
+			mediaPlayer.play();
 		}
 	}
 
@@ -188,13 +210,13 @@ public class PlayerController implements Initializable {
 	// <.setOnMouseClicked(event -> {...});>
 	@FXML
 	public void handleForward30ButtonClick(ActionEvent event) {
-		mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(30)));
+		mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(FORWARD30_BUTTON_PLAYBACK_ADJUSTMENT)));
 	}
 
 	// <.setOnMouseClicked(event -> {...});>
 	@FXML
 	public void handleReplay10ButtonClick(ActionEvent event) {
-		mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(-10)));
+		mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(REPLAY10_BUTTON_PLAYBACK_ADJUSTMENT)));
 	}
 
 	// on mouse click on volume/mute button <.setOnMouseClicked(event -> {...});>
@@ -261,8 +283,8 @@ public class PlayerController implements Initializable {
 			case F11 -> Player.toggleFullScreen();
 			case UP -> setControlsBarVisibility(true);
 			case DOWN -> setControlsBarVisibility(false);
-			case LEFT -> adjustPlaybackBySeconds(-60);
-			case RIGHT -> adjustPlaybackBySeconds(60);
+			case LEFT -> adjustPlaybackBySeconds(LEFT_BUTTON_PLAYBACK_ADJUSTMENT);
+			case RIGHT -> adjustPlaybackBySeconds(RIGHT_BUTTON_PLAYBACK_ADJUSTMENT);
 			case SPACE -> handlePlayButtonClick();
 			default -> {
 			}
@@ -278,68 +300,68 @@ public class PlayerController implements Initializable {
 		Image imagePlay = new Image(
 				new File("src/main/resources/com/training/fxplayer/img/play.png").toURI().toString());
 		ivPlay = new ImageView(imagePlay);
-		ivPlay.setFitWidth(25);
-		ivPlay.setFitHeight(25);
+		ivPlay.setFitWidth(DEFAULT_ICON_SIZE);
+		ivPlay.setFitHeight(DEFAULT_ICON_SIZE);
 
 		// Button pause image.
 		Image imagePause = new Image(
 				new File("src/main/resources/com/training/fxplayer/img/pause.png").toURI().toString());
 		ivPause = new ImageView(imagePause);
-		ivPause.setFitHeight(25);
-		ivPause.setFitWidth(25);
+		ivPause.setFitHeight(DEFAULT_ICON_SIZE);
+		ivPause.setFitWidth(DEFAULT_ICON_SIZE);
 
 		// Button restart image.
 		Image imageRestart = new Image(
 				new File("src/main/resources/com/training/fxplayer/img/restart.png").toURI().toString());
 		ivRestart = new ImageView(imageRestart);
-		ivRestart.setFitWidth(25);
-		ivRestart.setFitHeight(25);
+		ivRestart.setFitWidth(DEFAULT_ICON_SIZE);
+		ivRestart.setFitHeight(DEFAULT_ICON_SIZE);
 
 		// Button mute image.
 		Image imageMute = new Image(
 				new File("src/main/resources/com/training/fxplayer/img/mute.png").toURI().toString());
 		ivMute = new ImageView(imageMute);
-		ivMute.setFitWidth(25);
-		ivMute.setFitHeight(25);
+		ivMute.setFitWidth(DEFAULT_ICON_SIZE);
+		ivMute.setFitHeight(DEFAULT_ICON_SIZE);
 
 		// Button volume image.
 		Image imageVolume = new Image(
 				new File("src/main/resources/com/training/fxplayer/img/volume.png").toURI().toString());
 		ivVolume = new ImageView(imageVolume);
-		ivVolume.setFitWidth(25);
-		ivVolume.setFitHeight(25);
+		ivVolume.setFitWidth(DEFAULT_ICON_SIZE);
+		ivVolume.setFitHeight(DEFAULT_ICON_SIZE);
 
 		// Button forward_30 image.
 		Image imageForward30 = new Image(
 				new File("src/main/resources/com/training/fxplayer/img/forward30.png").toURI().toString());
 		ivForward30 = new ImageView(imageForward30);
-		ivForward30.setFitWidth(25);
-		ivForward30.setFitHeight(25);
+		ivForward30.setFitWidth(DEFAULT_ICON_SIZE);
+		ivForward30.setFitHeight(DEFAULT_ICON_SIZE);
 
 		// Button replay_10 image.
 		Image imageReplay10 = new Image(
 				new File("src/main/resources/com/training/fxplayer/img/replay10.png").toURI().toString());
 		ivReplay10 = new ImageView(imageReplay10);
-		ivReplay10.setFitWidth(25);
-		ivReplay10.setFitHeight(25);
+		ivReplay10.setFitWidth(DEFAULT_ICON_SIZE);
+		ivReplay10.setFitHeight(DEFAULT_ICON_SIZE);
 
 		// Button open_file image.
 		Image imageOpenFile = new Image(
 				new File("src/main/resources/com/training/fxplayer/img/openFile.png").toURI().toString());
 		ivOpenFile = new ImageView(imageOpenFile);
-		ivOpenFile.setFitWidth(25);
-		ivOpenFile.setFitHeight(25);
+		ivOpenFile.setFitWidth(DEFAULT_ICON_SIZE);
+		ivOpenFile.setFitHeight(DEFAULT_ICON_SIZE);
 	}
 
 	private String formatTime(Duration duration) {
 		int hours = (int) duration.toHours();
-		int minutes = (int) duration.toMinutes() % 60;
-		int seconds = (int) duration.toSeconds() % 60;
+		int minutes = (int) duration.toMinutes() % NUMBER_OF_MINUTES_IN_HOUR;
+		int seconds = (int) duration.toSeconds() % NUMBER_OF_MINUTES_IN_HOUR;
 
 		if (hours > 0) {
-			return String.format("%d:%02d:%02d", hours, minutes, seconds);
+			return String.format(FULL_TIME_FORMAT, hours, minutes, seconds);
 		} else {
-			return String.format("%d:%02d", minutes, seconds);
+			return String.format(SHORT_TIME_FORMAT, minutes, seconds);
 		}
 	}
 
@@ -360,17 +382,32 @@ public class PlayerController implements Initializable {
 	}
 
 	private void handlePlayButtonClick() {
-		if (isEndOfMedia) {
-			isEndOfMedia = false;
-			mediaPlayer.seek(Duration.ZERO);
-			mediaPlayer.play();
-			playButton.setGraphic(ivPause);
-		} else if (mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
-			mediaPlayer.pause();
-			playButton.setGraphic(ivPlay);
-		} else {
-			mediaPlayer.play();
-			playButton.setGraphic(ivPause);
+		if (mediaPlayer != null) {
+			if (isEndOfMedia) {
+				isEndOfMedia = false;
+				mediaPlayer.seek(Duration.ZERO);
+				mediaPlayer.play();
+				playButton.setGraphic(ivPause);
+			} else if (mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
+				mediaPlayer.pause();
+				playButton.setGraphic(ivPlay);
+			} else {
+				mediaPlayer.play();
+				playButton.setGraphic(ivPause);
+			}
 		}
+	}
+
+	private void releaseCurrentMediaPlayer() {
+		if (mediaPlayer != null) {
+			mediaPlayer.stop();
+			mediaPlayer.dispose();
+		}
+	}
+
+	private void configureFileChooser() {
+		FILE_CHOOSER.setInitialDirectory(new File(INITIAL_DIRECTORY));
+		FILE_CHOOSER.getExtensionFilters()
+				.add(new FileChooser.ExtensionFilter(EXTENSION_FILTER_DESCRIPTION, SUPPORTED_EXTENSIONS));
 	}
 }

@@ -8,12 +8,16 @@ import javafx.stage.Stage;
 public class Player extends Application {
 
 	/*
-	 * TODO: 1. close media player before opening next media file 2. add filters to
-	 * FILE_CHOOSER (file types, default directory) 3. show album covers for music
-	 * files 4. open associated files using executable of this app
+	 * TODO: 1. show album covers for music files 2. open associated files using
+	 * executable of this app 3. refactoring
 	 */
 
 	public static final String APP_NAME = "FX Player";
+	private static final String FXML_FILE = "player.fxml";
+	private static final int INITIAL_APP_WIDTH = 960;
+	private static final int INITIAL_APP_HEIGHT = 540;
+	private static final String STYLES_FILE = "styles.css";
+	private static final String EMPTY_STRING = "";
 
 	private static Scene scene;
 	private static Stage primaryStage;
@@ -23,15 +27,15 @@ public class Player extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		Player.primaryStage = primaryStage;
 
-		FXMLLoader fxmlLoader = new FXMLLoader(Player.class.getResource("player.fxml"));
-		scene = new Scene(fxmlLoader.load(), 960, 540);
-		scene.getStylesheets().add(getClass().getResource("styles.css").toExternalForm());
+		FXMLLoader fxmlLoader = new FXMLLoader(Player.class.getResource(FXML_FILE));
+		scene = new Scene(fxmlLoader.load(), INITIAL_APP_WIDTH, INITIAL_APP_HEIGHT);
+		scene.getStylesheets().add(getClass().getResource(STYLES_FILE).toExternalForm());
 
 		playerController = fxmlLoader.getController();
 		playerController.handleKeyPresses();
 
 		// to supress "Press ESC to exit full-screen mode." hint
-		primaryStage.setFullScreenExitHint("");
+		primaryStage.setFullScreenExitHint(EMPTY_STRING);
 
 		// puts this app's window on top of other windows
 		primaryStage.setAlwaysOnTop(true);
