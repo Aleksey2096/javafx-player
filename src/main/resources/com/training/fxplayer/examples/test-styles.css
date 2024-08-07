@@ -1,0 +1,22 @@
+/*
+.button {
+    -fx-text-fill: fuchsia;
+}
+*/
+.root-stack-pane { /* custom class name */
+	-fx-background-color: black;
+}
+
+.slider .track { /* default class names */
+	-fx-background-color: lightgray;
+}
+
+.transparent-button { /* custom class name */
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.time-label { /* custom class name */
+    -fx-font-size: 16px;
+    -fx-text-fill: lightgray; 
+}
