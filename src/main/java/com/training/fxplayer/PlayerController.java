@@ -2,6 +2,7 @@ package com.training.fxplayer;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Map;
 import java.util.ResourceBundle;
 
 import javafx.animation.PauseTransition;
@@ -30,7 +31,9 @@ public class PlayerController implements Initializable {
 
 	private static final String INITIAL_DIRECTORY = "D:/My documents/Downloads";
 	private static final String EXTENSION_FILTER_DESCRIPTION = "Video and Music Files";
+	private static final String AUXILIARY_EXTENSION_FILTER_DESCRIPTION = "All Files";
 	private static final String[] SUPPORTED_EXTENSIONS = { "*.mp4", "*.flv", "*.mp3", "*.m4a" };
+	private static final String ALL_EXTENSIONS = "*.*";
 	private static final String FULL_TIME_FORMAT = "%d:%02d:%02d";
 	private static final String SHORT_TIME_FORMAT = "%d:%02d";
 	private static final int NUMBER_OF_MINUTES_IN_HOUR = 60;
@@ -42,6 +45,8 @@ public class PlayerController implements Initializable {
 	private static final int FORWARD30_BUTTON_PLAYBACK_ADJUSTMENT = 30;
 	private static final String APP_TITLE_FORMAT = "%s - %s";
 	private static final String CURRENT_TOTAL_TIME_DELIMITER = " / ";
+	private static final String WIDTH_PROPERTY = "width";
+	private static final String HEIGHT_PROPERTY = "height";
 
 	// Delay to distinguish between single and double click
 	private static final PauseTransition PAUSE_TRANSITION = new PauseTransition(Duration.millis(200));
@@ -58,6 +63,8 @@ public class PlayerController implements Initializable {
 	private StackPane stackPane;
 	@FXML
 	private MediaView mediaView;
+	@FXML
+	private ImageView imageView;
 	@FXML
 	private Slider progressSlider;
 	@FXML
@@ -94,13 +101,7 @@ public class PlayerController implements Initializable {
 
 		configureFileChooser();
 
-		DoubleProperty widthProperty = mediaView.fitWidthProperty();
-		DoubleProperty hightProperty = mediaView.fitHeightProperty();
-
-		widthProperty.bind(Bindings.selectDouble(mediaView.sceneProperty(), "width"));
-		hightProperty.bind(Bindings.selectDouble(mediaView.sceneProperty(), "height"));
-
-		mediaView.setPreserveRatio(true);
+		fitViewsIntoScene();
 
 		volumeSlider.valueProperty().addListener(observable -> {
 			if (mediaPlayer != null) {
@@ -162,6 +163,21 @@ public class PlayerController implements Initializable {
 
 			mediaPlayer.setOnReady(() -> {
 				progressSlider.setMax(media.getDuration().toSeconds());
+
+				Map<String, Object> metadata = media.getMetadata();
+
+				// Check if the file is audio or video
+				if (metadata.containsKey("image")) {
+					// If it's an audio file with an album cover
+					imageView.setImage((Image) metadata.get("image"));
+					imageView.setVisible(true);
+					mediaView.setVisible(false);
+				} else {
+					// If it's a video file
+					imageView.setImage(null);
+					imageView.setVisible(false);
+					mediaView.setVisible(true);
+				}
 			});
 
 			mediaPlayer.setOnEndOfMedia(() -> {
@@ -407,7 +423,26 @@ public class PlayerController implements Initializable {
 
 	private void configureFileChooser() {
 		FILE_CHOOSER.setInitialDirectory(new File(INITIAL_DIRECTORY));
-		FILE_CHOOSER.getExtensionFilters()
-				.add(new FileChooser.ExtensionFilter(EXTENSION_FILTER_DESCRIPTION, SUPPORTED_EXTENSIONS));
+		FILE_CHOOSER.getExtensionFilters().addAll(
+				new FileChooser.ExtensionFilter(EXTENSION_FILTER_DESCRIPTION, SUPPORTED_EXTENSIONS),
+				new FileChooser.ExtensionFilter(AUXILIARY_EXTENSION_FILTER_DESCRIPTION, ALL_EXTENSIONS));
+	}
+
+	private void fitViewsIntoScene() {
+		DoubleProperty mediaWidthProperty = mediaView.fitWidthProperty();
+		DoubleProperty mediaHightProperty = mediaView.fitHeightProperty();
+
+		mediaWidthProperty.bind(Bindings.selectDouble(mediaView.sceneProperty(), WIDTH_PROPERTY));
+		mediaHightProperty.bind(Bindings.selectDouble(mediaView.sceneProperty(), HEIGHT_PROPERTY));
+
+		mediaView.setPreserveRatio(true);
+
+		DoubleProperty imageWidthProperty = imageView.fitWidthProperty();
+		DoubleProperty imageHightProperty = imageView.fitHeightProperty();
+
+		imageWidthProperty.bind(Bindings.selectDouble(imageView.sceneProperty(), WIDTH_PROPERTY));
+		imageHightProperty.bind(Bindings.selectDouble(imageView.sceneProperty(), HEIGHT_PROPERTY));
+
+		imageView.setPreserveRatio(true);
 	}
 }
