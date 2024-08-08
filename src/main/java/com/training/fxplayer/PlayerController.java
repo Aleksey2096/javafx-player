@@ -22,6 +22,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
+import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaView;
 import javafx.stage.FileChooser;
@@ -85,6 +86,8 @@ public class PlayerController implements Initializable {
 	private Label durationLabel;
 	@FXML
 	private HBox volumeControlsHBox;
+	@FXML
+	private Label errorMessageLabel;
 
 	// ImageViews for the buttons and labels.
 	private ImageView ivPlay;
@@ -103,6 +106,8 @@ public class PlayerController implements Initializable {
 
 		fitViewsIntoScene();
 
+		bindControlsImages();
+
 		volumeSlider.valueProperty().addListener(observable -> {
 			if (mediaPlayer != null) {
 				double newVolume = volumeSlider.getValue();
@@ -118,8 +123,6 @@ public class PlayerController implements Initializable {
 				}
 			}
 		});
-
-		bindControlsImages();
 
 		/*
 		 * SET THE DEFAULTS
@@ -148,6 +151,8 @@ public class PlayerController implements Initializable {
 		volumeSlider.setManaged(false);
 
 		progressSlider.setDisable(true);
+
+		errorMessageLabel.setVisible(false);
 	}
 
 	@FXML
@@ -157,62 +162,72 @@ public class PlayerController implements Initializable {
 		if (file != null) {
 			releaseCurrentMediaPlayer();
 
-			Media media = new Media(file.toURI().toString());
-			mediaPlayer = new MediaPlayer(media);
-			mediaView.setMediaPlayer(mediaPlayer);
+			try {
+				Media media = new Media(file.toURI().toString());
+				mediaPlayer = new MediaPlayer(media);
+				mediaView.setMediaPlayer(mediaPlayer);
 
-			mediaPlayer.setOnReady(() -> {
-				progressSlider.setMax(media.getDuration().toSeconds());
+				mediaPlayer.setOnReady(() -> {
+					progressSlider.setMax(media.getDuration().toSeconds());
 
-				Map<String, Object> metadata = media.getMetadata();
+					Map<String, Object> metadata = media.getMetadata();
 
-				// Check if the file is audio or video
-				if (metadata.containsKey("image")) {
-					// If it's an audio file with an album cover
-					imageView.setImage((Image) metadata.get("image"));
-					imageView.setVisible(true);
-					mediaView.setVisible(false);
-				} else {
-					// If it's a video file
-					imageView.setImage(null);
-					imageView.setVisible(false);
-					mediaView.setVisible(true);
-				}
-			});
+					// Check if the file is audio or video
+					if (metadata.containsKey("image")) {
+						// If it's an audio file with an album cover
+						imageView.setImage((Image) metadata.get("image"));
+						imageView.setVisible(true);
+						mediaView.setVisible(false);
+						errorMessageLabel.setVisible(false);
+					} else {
+						// If it's a video file
+						imageView.setImage(null);
+						imageView.setVisible(false);
+						mediaView.setVisible(true);
+						errorMessageLabel.setVisible(false);
+					}
+				});
 
-			mediaPlayer.setOnEndOfMedia(() -> {
-				playButton.setGraphic(ivRestart);
-				isEndOfMedia = true;
-			});
+				mediaPlayer.setOnEndOfMedia(() -> {
+					playButton.setGraphic(ivRestart);
+					isEndOfMedia = true;
+				});
 
-			mediaPlayer.currentTimeProperty().addListener((observable, oldValue, newValue) -> {
-				currentTimeLabel.setText(formatTime(mediaPlayer.getCurrentTime()) + CURRENT_TOTAL_TIME_DELIMITER);
+				mediaPlayer.currentTimeProperty().addListener((observable, oldValue, newValue) -> {
+					currentTimeLabel.setText(formatTime(mediaPlayer.getCurrentTime()) + CURRENT_TOTAL_TIME_DELIMITER);
 
-				progressSlider.setValue(newValue.toSeconds());
+					progressSlider.setValue(newValue.toSeconds());
 
-				// changes restart icon to play icon if the user selected another playback time
-				// after the media has ended
-				if (newValue.toSeconds() < media.getDuration().toSeconds() && isEndOfMedia) {
-					playButton.setGraphic(ivPlay);
-					isEndOfMedia = false;
-				}
-			});
+					// changes restart icon to play icon if the user selected another playback time
+					// after the media has ended
+					if (newValue.toSeconds() < media.getDuration().toSeconds() && isEndOfMedia) {
+						playButton.setGraphic(ivPlay);
+						isEndOfMedia = false;
+					}
+				});
 
-			mediaPlayer.totalDurationProperty().addListener((observable, oldValue, newValue) -> {
-				durationLabel.setText(formatTime(mediaPlayer.getTotalDuration()));
-			});
+				mediaPlayer.totalDurationProperty().addListener((observable, oldValue, newValue) -> {
+					durationLabel.setText(formatTime(mediaPlayer.getTotalDuration()));
+				});
 
-			Player.setAppTitle(String.format(APP_TITLE_FORMAT, Player.APP_NAME, file.getName()));
-			playButton.setGraphic(ivPause);
-			playButton.setDisable(false);
-			volumeButton.setGraphic(ivVolume);
-			volumeButton.setDisable(false);
-			progressSlider.setDisable(false);
-			replay10Button.setDisable(false);
-			forward30Button.setDisable(false);
+				Player.setAppTitle(String.format(APP_TITLE_FORMAT, Player.APP_NAME, file.getName()));
+				playButton.setGraphic(ivPause);
+				playButton.setDisable(false);
+				volumeButton.setGraphic(ivVolume);
+				volumeButton.setDisable(false);
+				progressSlider.setDisable(false);
+				replay10Button.setDisable(false);
+				forward30Button.setDisable(false);
 
-			mediaPlayer.setVolume(previousVolume);
-			mediaPlayer.play();
+				mediaPlayer.setVolume(previousVolume);
+				mediaPlayer.play();
+
+				mediaPlayer.setOnError(() -> {
+					displayErrorMessage("Error playing media: " + mediaPlayer.getError().getMessage());
+				});
+			} catch (MediaException me) {
+				displayErrorMessage("Unsupported media format.");
+			}
 		}
 	}
 
@@ -415,9 +430,14 @@ public class PlayerController implements Initializable {
 	}
 
 	private void releaseCurrentMediaPlayer() {
-		if (mediaPlayer != null) {
-			mediaPlayer.stop();
-			mediaPlayer.dispose();
+		try {
+			if (mediaPlayer != null) {
+				mediaPlayer.stop();
+				mediaPlayer.dispose();
+			}
+		} catch (NullPointerException e) {
+			// Underlying 'jfxPlayer' was null because previously opened media file was
+			// unsupported.
 		}
 	}
 
@@ -444,5 +464,12 @@ public class PlayerController implements Initializable {
 		imageHightProperty.bind(Bindings.selectDouble(imageView.sceneProperty(), HEIGHT_PROPERTY));
 
 		imageView.setPreserveRatio(true);
+	}
+
+	private void displayErrorMessage(String message) {
+		errorMessageLabel.setText(message);
+		errorMessageLabel.setVisible(true);
+		mediaView.setVisible(false);
+		imageView.setVisible(false);
 	}
 }

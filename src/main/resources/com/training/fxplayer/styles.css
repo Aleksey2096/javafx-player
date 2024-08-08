@@ -12,11 +12,16 @@
 }
 
 .transparent-button { /* custom class name */
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
+	-fx-background-color: transparent;
+	-fx-border-color: transparent;
 }
 
 .time-label { /* custom class name */
-    -fx-font-size: 16px;
-    -fx-text-fill: lightgray; 
+	-fx-font-size: 16px;
+	-fx-text-fill: lightgray;
+}
+
+.error-label { /* custom class name */
+	-fx-font-size: 20px;
+	-fx-text-fill: red;
 }
