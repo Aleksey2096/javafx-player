@@ -9,17 +9,16 @@ public class Player extends Application {
 
 	/*
 	 * TODO: 1. open associated files using executable of this app 2. refactoring 3.
-	 * transform "errorMessageLabel" to "messageLabel" to show welcome message on
-	 * opening 4. add default album cover for music files that don't have one. 5.
-	 * disable controls when unsupported file opened
+	 * add default album cover for music files that don't have one. 4. figure out
+	 * why some album covers aren't shown
 	 */
 
 	public static final String APP_NAME = "FX Player";
+	public static final String EMPTY_STRING = "";
 	private static final String FXML_FILE = "player.fxml";
 	private static final int INITIAL_APP_WIDTH = 960;
 	private static final int INITIAL_APP_HEIGHT = 540;
 	private static final String STYLES_FILE = "styles.css";
-	private static final String EMPTY_STRING = "";
 
 	private static Scene scene;
 	private static Stage primaryStage;

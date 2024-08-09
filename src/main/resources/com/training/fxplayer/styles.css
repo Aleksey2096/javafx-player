@@ -21,7 +21,7 @@
 	-fx-text-fill: lightgray;
 }
 
-.error-label { /* custom class name */
+.message-label { /* custom class name */
 	-fx-font-size: 20px;
-	-fx-text-fill: red;
+	-fx-text-fill: lightgray;
 }

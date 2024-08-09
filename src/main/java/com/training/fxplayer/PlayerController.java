@@ -8,6 +8,7 @@ import java.util.ResourceBundle;
 import javafx.animation.PauseTransition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -58,6 +59,8 @@ public class PlayerController implements Initializable {
 	private double previousVolume;
 	private boolean isMuted;
 
+	private ChangeListener<Duration> currentTimeListener;
+
 	@FXML
 	private VBox controlsBox;
 	@FXML
@@ -87,7 +90,7 @@ public class PlayerController implements Initializable {
 	@FXML
 	private HBox volumeControlsHBox;
 	@FXML
-	private Label errorMessageLabel;
+	private Label messageLabel;
 
 	// ImageViews for the buttons and labels.
 	private ImageView ivPlay;
@@ -132,27 +135,23 @@ public class PlayerController implements Initializable {
 		isMuted = false;
 		volumeSlider.setValue(previousVolume);
 
+		setDisableControls(true);
+
 		playButton.setGraphic(ivPlay);
-		playButton.setDisable(true);
 		isEndOfMedia = false;
 
 		replay10Button.setGraphic(ivReplay10);
-		replay10Button.setDisable(true);
 
 		forward30Button.setGraphic(ivForward30);
-		forward30Button.setDisable(true);
 
 		volumeButton.setGraphic(ivVolume);
-		volumeButton.setDisable(true);
 
 		openFileButton.setGraphic(ivOpenFile);
 
 		volumeSlider.setVisible(false);
 		volumeSlider.setManaged(false);
 
-		progressSlider.setDisable(true);
-
-		errorMessageLabel.setVisible(false);
+		messageLabel.setWrapText(true);
 	}
 
 	@FXML
@@ -178,13 +177,13 @@ public class PlayerController implements Initializable {
 						imageView.setImage((Image) metadata.get("image"));
 						imageView.setVisible(true);
 						mediaView.setVisible(false);
-						errorMessageLabel.setVisible(false);
+						messageLabel.setVisible(false);
 					} else {
 						// If it's a video file
 						imageView.setImage(null);
 						imageView.setVisible(false);
 						mediaView.setVisible(true);
-						errorMessageLabel.setVisible(false);
+						messageLabel.setVisible(false);
 					}
 				});
 
@@ -193,7 +192,7 @@ public class PlayerController implements Initializable {
 					isEndOfMedia = true;
 				});
 
-				mediaPlayer.currentTimeProperty().addListener((observable, oldValue, newValue) -> {
+				currentTimeListener = (observable, oldValue, newValue) -> {
 					currentTimeLabel.setText(formatTime(mediaPlayer.getCurrentTime()) + CURRENT_TOTAL_TIME_DELIMITER);
 
 					progressSlider.setValue(newValue.toSeconds());
@@ -204,7 +203,9 @@ public class PlayerController implements Initializable {
 						playButton.setGraphic(ivPlay);
 						isEndOfMedia = false;
 					}
-				});
+				};
+
+				mediaPlayer.currentTimeProperty().addListener(currentTimeListener);
 
 				mediaPlayer.totalDurationProperty().addListener((observable, oldValue, newValue) -> {
 					durationLabel.setText(formatTime(mediaPlayer.getTotalDuration()));
@@ -212,21 +213,18 @@ public class PlayerController implements Initializable {
 
 				Player.setAppTitle(String.format(APP_TITLE_FORMAT, Player.APP_NAME, file.getName()));
 				playButton.setGraphic(ivPause);
-				playButton.setDisable(false);
-				volumeButton.setGraphic(ivVolume);
-				volumeButton.setDisable(false);
-				progressSlider.setDisable(false);
-				replay10Button.setDisable(false);
-				forward30Button.setDisable(false);
+				setDisableControls(false);
 
-				mediaPlayer.setVolume(previousVolume);
+				if (isMuted) {
+					mediaPlayer.setVolume(0);
+				} else {
+					mediaPlayer.setVolume(previousVolume);
+				}
+
 				mediaPlayer.play();
 
-				mediaPlayer.setOnError(() -> {
-					displayErrorMessage("Error playing media: " + mediaPlayer.getError().getMessage());
-				});
-			} catch (MediaException me) {
-				displayErrorMessage("Unsupported media format.");
+			} catch (MediaException e) {
+				handleMediaException("Unsupported media format.");
 			}
 		}
 	}
@@ -432,8 +430,14 @@ public class PlayerController implements Initializable {
 	private void releaseCurrentMediaPlayer() {
 		try {
 			if (mediaPlayer != null) {
+
+				// to avoid errors when mediaPlayer is already disposed off but
+				// currentTimeListener is still working
+				mediaPlayer.currentTimeProperty().removeListener(currentTimeListener);
+
 				mediaPlayer.stop();
 				mediaPlayer.dispose();
+				mediaPlayer = null;
 			}
 		} catch (NullPointerException e) {
 			// Underlying 'jfxPlayer' was null because previously opened media file was
@@ -466,10 +470,31 @@ public class PlayerController implements Initializable {
 		imageView.setPreserveRatio(true);
 	}
 
-	private void displayErrorMessage(String message) {
-		errorMessageLabel.setText(message);
-		errorMessageLabel.setVisible(true);
+	private void displayMessage(String message) {
+		messageLabel.setText(message);
+		messageLabel.setVisible(true);
 		mediaView.setVisible(false);
 		imageView.setVisible(false);
+	}
+
+	private void handleMediaException(String errorMessage) {
+		resetControlsBar();
+		displayMessage(errorMessage);
+	}
+
+	private void resetControlsBar() {
+		playButton.setGraphic(ivPlay);
+		progressSlider.setValue(0);
+		currentTimeLabel.setText(Player.EMPTY_STRING);
+		durationLabel.setText(Player.EMPTY_STRING);
+		setDisableControls(true);
+	}
+
+	private void setDisableControls(boolean value) {
+		playButton.setDisable(value);
+		replay10Button.setDisable(value);
+		forward30Button.setDisable(value);
+		volumeButton.setDisable(value);
+		progressSlider.setDisable(value);
 	}
 }

@@ -15,7 +15,7 @@
       <StackPane fx:id="mediaContainer">
       	<MediaView fx:id="mediaView" fitHeight="200.0" fitWidth="200.0" />
       	<ImageView fx:id="imageView" fitHeight="200.0" fitWidth="200.0" />
-      	<Label fx:id="errorMessageLabel" styleClass="error-label" />
+      	<Label fx:id="messageLabel" styleClass="message-label" text="Welcome to FX Player! Please, choose preferred media file." />
       </StackPane>
       <VBox fx:id="controlsBox" alignment="BOTTOM_CENTER" prefHeight="200.0" prefWidth="100.0">
          <children>
