@@ -12,7 +12,7 @@
 		<maven.compiler.release>21</maven.compiler.release>
 		<javafx.version>23-ea+22</javafx.version>
 		<javafx.maven.plugin.version>0.0.8</javafx.maven.plugin.version>
-
+		<jaudiotagger.version>3.0.1</jaudiotagger.version>
 
 	</properties>
 
@@ -46,6 +46,11 @@
 			<groupId>org.openjfx</groupId>
 			<artifactId>javafx-media</artifactId>
 			<version>${javafx.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.jthink</groupId>
+			<artifactId>jaudiotagger</artifactId>
+			<version>${jaudiotagger.version}</version>
 		</dependency>
 
 
