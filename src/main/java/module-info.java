@@ -8,7 +8,7 @@ module fxplayer {
 
 	opens com.training.fxplayer to javafx.fxml;
 	opens com.training.fxplayer.examples to javafx.fxml;
+	opens com.training.fxplayer.controls to javafx.fxml;
 
 	exports com.training.fxplayer;
-	exports com.training.fxplayer.examples;
 }

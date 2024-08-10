@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.layout.HBox?>
@@ -9,6 +8,11 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.media.MediaView?>
 <?import javafx.scene.image.ImageView?>
+<?import com.training.fxplayer.controls.Replay10Button?>
+<?import com.training.fxplayer.controls.Forward30Button?>
+<?import com.training.fxplayer.controls.PlayButton?>
+<?import com.training.fxplayer.controls.VolumeButton?>
+<?import com.training.fxplayer.controls.OpenFileButton?>
 
 <StackPane fx:id="stackPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#handleStackPaneClick" prefHeight="400.0" prefWidth="600.0" styleClass="root-stack-pane" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.training.fxplayer.PlayerController">
    <children>
@@ -26,12 +30,12 @@
             </Slider>
             <HBox alignment="CENTER" prefHeight="30.0" prefWidth="200.0">
                <children>
-                  <Button fx:id="playButton" mnemonicParsing="false" onAction="#handlePlayButtonClick" style="-fx-cursor: hand;" styleClass="transparent-button" />
-                  <Button fx:id="replay10Button" mnemonicParsing="false" onAction="#handleReplay10ButtonClick" style="-fx-cursor: hand;" styleClass="transparent-button" />
-                  <Button fx:id="forward30Button" mnemonicParsing="false" onAction="#handleForward30ButtonClick" style="-fx-cursor: hand;" styleClass="transparent-button" />
+                  <PlayButton fx:id="playButton" mnemonicParsing="false" onAction="#handlePlayButtonClick" style="-fx-cursor: hand;" styleClass="transparent-button" />
+                  <Replay10Button fx:id="replay10Button" mnemonicParsing="false" onAction="#handleReplay10ButtonClick" style="-fx-cursor: hand;" styleClass="transparent-button" />
+                  <Forward30Button fx:id="forward30Button" mnemonicParsing="false" onAction="#handleForward30ButtonClick" style="-fx-cursor: hand;" styleClass="transparent-button" />
                   <HBox fx:id="volumeControlsHBox" alignment="CENTER_LEFT" onMouseExited="#handleMouseExitingVolumeControlsHBox" prefHeight="100.0" prefWidth="200.0">
                      <children>
-                     	<Button fx:id="volumeButton" mnemonicParsing="false" onAction="#handleVolumeButtonClick" onMouseEntered="#handleMouseEnteringVolumeButton" style="-fx-cursor: hand;" styleClass="transparent-button" />
+                     	<VolumeButton fx:id="volumeButton" mnemonicParsing="false" onAction="#handleVolumeButtonClick" onMouseEntered="#handleMouseEnteringVolumeButton" style="-fx-cursor: hand;" styleClass="transparent-button" />
                         <Slider fx:id="volumeSlider" blockIncrement="0.1" max="1.0" style="-fx-cursor: hand;" />
                      </children>
                   </HBox>
@@ -39,7 +43,7 @@
                      <children>
                      	<Label fx:id="currentTimeLabel" styleClass="time-label" />
                      	<Label fx:id="durationLabel" styleClass="time-label" />
-                        <Button fx:id="openFileButton" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleOpenFileButtonClick" style="-fx-cursor: hand;" styleClass="transparent-button" />
+                        <OpenFileButton fx:id="openFileButton" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleOpenFileButtonClick" style="-fx-cursor: hand;" styleClass="transparent-button" />
                      </children>
                   </HBox>
                </children>
