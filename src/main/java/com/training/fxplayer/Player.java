@@ -8,9 +8,8 @@ import javafx.stage.Stage;
 public class Player extends Application {
 
 	/*
-	 * TODO: 1. open associated files using executable of this app 2. refactoring 3.
-	 * add default album cover for music files that don't have one. 4. figure out
-	 * why some album covers aren't shown
+	 * TODO: 1. open associated files using executable of this app 2. refactoring
+	 * (using custom javafx objects)
 	 */
 
 	public static final String APP_NAME = "FX Player";

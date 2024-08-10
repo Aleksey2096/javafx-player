@@ -1,9 +1,13 @@
 package com.training.fxplayer;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.URL;
-import java.util.Map;
 import java.util.ResourceBundle;
+
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.images.Artwork;
 
 import javafx.animation.PauseTransition;
 import javafx.beans.binding.Bindings;
@@ -60,6 +64,7 @@ public class PlayerController implements Initializable {
 	private boolean isMuted;
 
 	private ChangeListener<Duration> currentTimeListener;
+	Image defaultAlbumCoverImage;
 
 	@FXML
 	private VBox controlsBox;
@@ -131,6 +136,9 @@ public class PlayerController implements Initializable {
 		 * SET THE DEFAULTS
 		 */
 
+		defaultAlbumCoverImage = new Image(
+				new File("src/main/resources/com/training/fxplayer/img/default_album_cover.jpg").toURI().toString());
+
 		previousVolume = INITIAL_VOLUME;
 		isMuted = false;
 		volumeSlider.setValue(previousVolume);
@@ -169,18 +177,21 @@ public class PlayerController implements Initializable {
 				mediaPlayer.setOnReady(() -> {
 					progressSlider.setMax(media.getDuration().toSeconds());
 
-					Map<String, Object> metadata = media.getMetadata();
-
 					// Check if the file is audio or video
-					if (metadata.containsKey("image")) {
-						// If it's an audio file with an album cover
-						imageView.setImage((Image) metadata.get("image"));
+					if (file.getName().endsWith(".mp3") || file.getName().endsWith(".m4a")) {
+						Image albumCover = extractAlbumCover(file);
+
 						imageView.setVisible(true);
 						mediaView.setVisible(false);
 						messageLabel.setVisible(false);
+						if (albumCover != null) {
+							imageView.setImage(albumCover);
+						} else {
+							// If it's an audio file without album cover, set default image
+							imageView.setImage(defaultAlbumCoverImage);
+						}
 					} else {
 						// If it's a video file
-						imageView.setImage(null);
 						imageView.setVisible(false);
 						mediaView.setVisible(true);
 						messageLabel.setVisible(false);
@@ -496,5 +507,21 @@ public class PlayerController implements Initializable {
 		forward30Button.setDisable(value);
 		volumeButton.setDisable(value);
 		progressSlider.setDisable(value);
+	}
+
+	private Image extractAlbumCover(File file) {
+		try {
+			Tag tag = AudioFileIO.read(file).getTag();
+			if (tag != null) {
+				Artwork artwork = tag.getFirstArtwork();
+				if (artwork != null) {
+					byte[] imageData = artwork.getBinaryData();
+					return new Image(new ByteArrayInputStream(imageData));
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 }
