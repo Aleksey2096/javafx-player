@@ -1,4 +1,4 @@
-package com.training.fxplayer.controls;
+package com.training.fxplayer.gui;
 
 import java.io.File;
 

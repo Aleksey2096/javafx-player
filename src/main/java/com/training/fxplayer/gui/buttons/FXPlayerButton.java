@@ -1,4 +1,4 @@
-package com.training.fxplayer.controls;
+package com.training.fxplayer.gui.buttons;
 
 import javafx.scene.control.Button;
 import javafx.scene.image.Image;

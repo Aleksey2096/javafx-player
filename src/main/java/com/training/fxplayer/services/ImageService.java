@@ -10,7 +10,7 @@ import org.jaudiotagger.tag.images.Artwork;
 import javafx.scene.image.Image;
 
 public class ImageService {
-	public static Image loadImage(String resourcePath) {
+	public static Image loadResourceImage(String resourcePath) {
 		return new Image(ImageService.class.getResourceAsStream(resourcePath));
 	}
 

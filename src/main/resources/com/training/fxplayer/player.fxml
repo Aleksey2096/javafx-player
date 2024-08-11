@@ -6,19 +6,19 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.media.MediaView?>
-<?import javafx.scene.image.ImageView?>
-<?import com.training.fxplayer.controls.Replay10Button?>
-<?import com.training.fxplayer.controls.Forward30Button?>
-<?import com.training.fxplayer.controls.PlayButton?>
-<?import com.training.fxplayer.controls.VolumeButton?>
-<?import com.training.fxplayer.controls.OpenFileButton?>
+<?import com.training.fxplayer.gui.views.FXPlayerMediaView?>
+<?import com.training.fxplayer.gui.views.FXPlayerImageView?>
+<?import com.training.fxplayer.gui.buttons.Replay10Button?>
+<?import com.training.fxplayer.gui.buttons.Forward30Button?>
+<?import com.training.fxplayer.gui.buttons.PlayButton?>
+<?import com.training.fxplayer.gui.buttons.VolumeButton?>
+<?import com.training.fxplayer.gui.buttons.OpenFileButton?>
 
 <StackPane fx:id="stackPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onMouseClicked="#handleStackPaneClick" prefHeight="400.0" prefWidth="600.0" styleClass="root-stack-pane" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.training.fxplayer.PlayerController">
    <children>
       <StackPane fx:id="mediaContainer">
-      	<MediaView fx:id="mediaView" fitHeight="200.0" fitWidth="200.0" />
-      	<ImageView fx:id="imageView" fitHeight="200.0" fitWidth="200.0" />
+      	<FXPlayerMediaView fx:id="mediaView" fitHeight="200.0" fitWidth="200.0" />
+      	<FXPlayerImageView fx:id="imageView" fitHeight="200.0" fitWidth="200.0" />
       	<Label fx:id="messageLabel" styleClass="message-label" text="Welcome to FX Player! Please, choose preferred media file." />
       </StackPane>
       <VBox fx:id="controlsBox" alignment="BOTTOM_CENTER" prefHeight="200.0" prefWidth="100.0">

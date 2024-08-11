@@ -1,31 +1,30 @@
 package com.training.fxplayer;
 
 import static com.training.fxplayer.services.ImageService.extractAlbumCover;
-import static com.training.fxplayer.services.ImageService.loadImage;
 import static com.training.fxplayer.services.TimeFormatterService.formatTime;
 
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-import com.training.fxplayer.controls.FileSelector;
-import com.training.fxplayer.controls.Forward30Button;
-import com.training.fxplayer.controls.OpenFileButton;
-import com.training.fxplayer.controls.PlayButton;
-import com.training.fxplayer.controls.Replay10Button;
-import com.training.fxplayer.controls.VolumeButton;
+import com.training.fxplayer.gui.FileSelector;
+import com.training.fxplayer.gui.MediaContainer;
+import com.training.fxplayer.gui.MediaContainer.MediaContainerElement;
+import com.training.fxplayer.gui.buttons.Forward30Button;
+import com.training.fxplayer.gui.buttons.OpenFileButton;
+import com.training.fxplayer.gui.buttons.PlayButton;
+import com.training.fxplayer.gui.buttons.Replay10Button;
+import com.training.fxplayer.gui.buttons.VolumeButton;
+import com.training.fxplayer.gui.views.FXPlayerImageView;
+import com.training.fxplayer.gui.views.FXPlayerMediaView;
 
 import javafx.animation.PauseTransition;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
@@ -34,7 +33,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaException;
 import javafx.scene.media.MediaPlayer;
-import javafx.scene.media.MediaView;
 import javafx.util.Duration;
 
 public class PlayerController implements Initializable {
@@ -46,8 +44,6 @@ public class PlayerController implements Initializable {
 	private static final int FORWARD30_BUTTON_PLAYBACK_ADJUSTMENT = 30;
 	private static final String APP_TITLE_FORMAT = "%s - %s";
 	private static final String CURRENT_TOTAL_TIME_DELIMITER = " / ";
-	private static final String WIDTH_PROPERTY = "width";
-	private static final String HEIGHT_PROPERTY = "height";
 
 	// Delay to distinguish between single and double click
 	private static final PauseTransition PAUSE_TRANSITION = new PauseTransition(Duration.millis(200));
@@ -55,21 +51,21 @@ public class PlayerController implements Initializable {
 	private final FileSelector fileSelector = new FileSelector(Player.getPrimaryStage());
 
 	private MediaPlayer mediaPlayer;
-	private boolean isEndOfMedia;
-	private double previousVolume;
-	private boolean isMuted;
+	private MediaContainer mediaContainer;
+	private boolean isEndOfMedia = false;
+	private double previousVolume = INITIAL_VOLUME;
+	private boolean isMuted = false;
 
 	private ChangeListener<Duration> currentTimeListener;
-	private Image defaultAlbumCoverImage;
 
 	@FXML
 	private VBox controlsBox;
 	@FXML
 	private StackPane stackPane;
 	@FXML
-	private MediaView mediaView;
+	private FXPlayerMediaView mediaView;
 	@FXML
-	private ImageView imageView;
+	private FXPlayerImageView imageView;
 	@FXML
 	private Slider progressSlider;
 	@FXML
@@ -96,7 +92,7 @@ public class PlayerController implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 
-		fitViewsIntoScene();
+		mediaContainer = new MediaContainer(mediaView, imageView, messageLabel);
 
 		volumeSlider.valueProperty().addListener(observable -> {
 			if (mediaPlayer != null) {
@@ -114,24 +110,12 @@ public class PlayerController implements Initializable {
 			}
 		});
 
-		/*
-		 * SET THE DEFAULTS
-		 */
-
-		defaultAlbumCoverImage = loadImage("/com/training/fxplayer/img/default_album_cover.jpg");
-
-		previousVolume = INITIAL_VOLUME;
-		isMuted = false;
 		volumeSlider.setValue(previousVolume);
 
 		setDisableControls(true);
 
-		isEndOfMedia = false;
-
 		volumeSlider.setVisible(false);
 		volumeSlider.setManaged(false);
-
-		messageLabel.setWrapText(true);
 	}
 
 	@FXML
@@ -144,31 +128,16 @@ public class PlayerController implements Initializable {
 			try {
 				Media media = new Media(file.toURI().toString());
 				mediaPlayer = new MediaPlayer(media);
-				mediaView.setMediaPlayer(mediaPlayer);
+				mediaContainer.setMediaPlayer(mediaPlayer);
 
 				mediaPlayer.setOnReady(() -> {
 					progressSlider.setMax(media.getDuration().toSeconds());
 
 					// Check if the file is audio or video
 					if (file.getName().endsWith(".mp3") || file.getName().endsWith(".m4a")) {
-
-						imageView.setVisible(true);
-						mediaView.setVisible(false);
-						messageLabel.setVisible(false);
-
-						Image albumCover = extractAlbumCover(file);
-
-						if (albumCover != null) {
-							imageView.setImage(albumCover);
-						} else {
-							// If it's an audio file without album cover, set default image
-							imageView.setImage(defaultAlbumCoverImage);
-						}
+						mediaContainer.setAlbumCover(extractAlbumCover(file));
 					} else {
-						// If it's a video file
-						imageView.setVisible(false);
-						mediaView.setVisible(true);
-						messageLabel.setVisible(false);
+						mediaContainer.setVisible(MediaContainerElement.MEDIA_VIEW);
 					}
 				});
 
@@ -214,26 +183,21 @@ public class PlayerController implements Initializable {
 		}
 	}
 
-	// on mouse click on play/pause/restart button <.setOnMouseClicked(event ->
-	// {...});>
 	@FXML
 	public void handlePlayButtonClick(ActionEvent event) {
 		handlePlayButtonClick();
 	}
 
-	// <.setOnMouseClicked(event -> {...});>
 	@FXML
 	public void handleForward30ButtonClick(ActionEvent event) {
 		mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(FORWARD30_BUTTON_PLAYBACK_ADJUSTMENT)));
 	}
 
-	// <.setOnMouseClicked(event -> {...});>
 	@FXML
 	public void handleReplay10ButtonClick(ActionEvent event) {
 		mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(REPLAY10_BUTTON_PLAYBACK_ADJUSTMENT)));
 	}
 
-	// on mouse click on volume/mute button <.setOnMouseClicked(event -> {...});>
 	@FXML
 	public void handleVolumeButtonClick(ActionEvent event) {
 		if (isMuted) {
@@ -247,7 +211,6 @@ public class PlayerController implements Initializable {
 		}
 	}
 
-	// <.setOnMouseEntered(event -> {...});>
 	@FXML
 	public void handleMouseEnteringVolumeButton(MouseEvent event) {
 		if (!volumeSlider.isVisible()) {
@@ -256,15 +219,12 @@ public class PlayerController implements Initializable {
 		}
 	}
 
-	// <.setOnMouseExited(event -> {...});>
 	@FXML
 	public void handleMouseExitingVolumeControlsHBox(MouseEvent event) {
 		volumeSlider.setVisible(false);
 		volumeSlider.setManaged(false);
 	}
 
-	// <.setOnMousePressed(event -> {...});> and <.setOnMouseDragged(event ->
-	// {...});>
 	@FXML
 	public void handleProgressSliderOnMousePressedAndDragged(MouseEvent event) {
 		mediaPlayer.seek(Duration.seconds(progressSlider.getValue()));
@@ -275,7 +235,6 @@ public class PlayerController implements Initializable {
 		}
 	}
 
-	// <.setOnMouseClicked(event -> {...});>
 	@FXML
 	public void handleStackPaneClick(MouseEvent event) {
 		if (event.getClickCount() == 1) {
@@ -357,34 +316,9 @@ public class PlayerController implements Initializable {
 		}
 	}
 
-	private void fitViewsIntoScene() {
-		DoubleProperty mediaWidthProperty = mediaView.fitWidthProperty();
-		DoubleProperty mediaHightProperty = mediaView.fitHeightProperty();
-
-		mediaWidthProperty.bind(Bindings.selectDouble(mediaView.sceneProperty(), WIDTH_PROPERTY));
-		mediaHightProperty.bind(Bindings.selectDouble(mediaView.sceneProperty(), HEIGHT_PROPERTY));
-
-		mediaView.setPreserveRatio(true);
-
-		DoubleProperty imageWidthProperty = imageView.fitWidthProperty();
-		DoubleProperty imageHightProperty = imageView.fitHeightProperty();
-
-		imageWidthProperty.bind(Bindings.selectDouble(imageView.sceneProperty(), WIDTH_PROPERTY));
-		imageHightProperty.bind(Bindings.selectDouble(imageView.sceneProperty(), HEIGHT_PROPERTY));
-
-		imageView.setPreserveRatio(true);
-	}
-
-	private void displayMessage(String message) {
-		messageLabel.setText(message);
-		messageLabel.setVisible(true);
-		mediaView.setVisible(false);
-		imageView.setVisible(false);
-	}
-
 	private void handleMediaException(String errorMessage) {
 		resetControlsBar();
-		displayMessage(errorMessage);
+		mediaContainer.displayMessage(errorMessage);
 	}
 
 	private void resetControlsBar() {
