@@ -1,5 +1,7 @@
 package com.training.fxplayer;
 
+import java.io.File;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -27,7 +29,7 @@ public class Player extends Application {
 	public void start(Stage primaryStage) throws Exception {
 		Player.primaryStage = primaryStage;
 
-		FXMLLoader fxmlLoader = new FXMLLoader(Player.class.getResource(FXML_FILE));
+		FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource(FXML_FILE));
 		scene = new Scene(fxmlLoader.load(), INITIAL_APP_WIDTH, INITIAL_APP_HEIGHT);
 		scene.getStylesheets().add(getClass().getResource(STYLES_FILE).toExternalForm());
 
@@ -43,10 +45,16 @@ public class Player extends Application {
 		setAppTitle(APP_NAME);
 		primaryStage.setScene(scene);
 		primaryStage.show();
+
+		String[] args = getParameters().getRaw().toArray(new String[0]);
+
+		if (args.length > 0) {
+			playerController.openFile(new File(args[0]));
+		}
 	}
 
 	public static void main(String[] args) {
-		launch();
+		launch(args);
 	}
 
 	public static void setAppTitle(String title) {

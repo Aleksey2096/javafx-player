@@ -137,7 +137,7 @@ public class PlayerController implements Initializable {
 		 */
 
 		defaultAlbumCoverImage = new Image(
-				new File("src/main/resources/com/training/fxplayer/img/default_album_cover.jpg").toURI().toString());
+				getClass().getResourceAsStream("/com/training/fxplayer/img/default_album_cover.jpg"));
 
 		previousVolume = INITIAL_VOLUME;
 		isMuted = false;
@@ -166,6 +166,10 @@ public class PlayerController implements Initializable {
 	public void handleOpenFileButtonClick(ActionEvent event) {
 		File file = FILE_CHOOSER.showOpenDialog(Player.getPrimaryStage());
 
+		openFile(file);
+	}
+
+	public void openFile(File file) {
 		if (file != null) {
 			releaseCurrentMediaPlayer();
 
@@ -187,7 +191,6 @@ public class PlayerController implements Initializable {
 						if (albumCover != null) {
 							imageView.setImage(albumCover);
 						} else {
-							// If it's an audio file without album cover, set default image
 							imageView.setImage(defaultAlbumCoverImage);
 						}
 					} else {
@@ -240,26 +243,21 @@ public class PlayerController implements Initializable {
 		}
 	}
 
-	// on mouse click on play/pause/restart button <.setOnMouseClicked(event ->
-	// {...});>
 	@FXML
 	public void handlePlayButtonClick(ActionEvent event) {
 		handlePlayButtonClick();
 	}
 
-	// <.setOnMouseClicked(event -> {...});>
 	@FXML
 	public void handleForward30ButtonClick(ActionEvent event) {
 		mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(FORWARD30_BUTTON_PLAYBACK_ADJUSTMENT)));
 	}
 
-	// <.setOnMouseClicked(event -> {...});>
 	@FXML
 	public void handleReplay10ButtonClick(ActionEvent event) {
 		mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(REPLAY10_BUTTON_PLAYBACK_ADJUSTMENT)));
 	}
 
-	// on mouse click on volume/mute button <.setOnMouseClicked(event -> {...});>
 	@FXML
 	public void handleVolumeButtonClick(ActionEvent event) {
 		if (isMuted) {
@@ -273,7 +271,6 @@ public class PlayerController implements Initializable {
 		}
 	}
 
-	// <.setOnMouseEntered(event -> {...});>
 	@FXML
 	public void handleMouseEnteringVolumeButton(MouseEvent event) {
 		if (!volumeSlider.isVisible()) {
@@ -282,15 +279,12 @@ public class PlayerController implements Initializable {
 		}
 	}
 
-	// <.setOnMouseExited(event -> {...});>
 	@FXML
 	public void handleMouseExitingVolumeControlsHBox(MouseEvent event) {
 		volumeSlider.setVisible(false);
 		volumeSlider.setManaged(false);
 	}
 
-	// <.setOnMousePressed(event -> {...});> and <.setOnMouseDragged(event ->
-	// {...});>
 	@FXML
 	public void handleProgressSliderOnMousePressedAndDragged(MouseEvent event) {
 		mediaPlayer.seek(Duration.seconds(progressSlider.getValue()));
@@ -301,7 +295,6 @@ public class PlayerController implements Initializable {
 		}
 	}
 
-	// <.setOnMouseClicked(event -> {...});>
 	@FXML
 	public void handleStackPaneClick(MouseEvent event) {
 		if (event.getClickCount() == 1) {
@@ -337,57 +330,49 @@ public class PlayerController implements Initializable {
 		// Get the paths of the images and make them into images.
 
 		// Button play image
-		Image imagePlay = new Image(
-				new File("src/main/resources/com/training/fxplayer/img/play.png").toURI().toString());
+		Image imagePlay = new Image(getClass().getResourceAsStream("/com/training/fxplayer/img/play.png"));
 		ivPlay = new ImageView(imagePlay);
 		ivPlay.setFitWidth(DEFAULT_ICON_SIZE);
 		ivPlay.setFitHeight(DEFAULT_ICON_SIZE);
 
 		// Button pause image.
-		Image imagePause = new Image(
-				new File("src/main/resources/com/training/fxplayer/img/pause.png").toURI().toString());
+		Image imagePause = new Image(getClass().getResourceAsStream("/com/training/fxplayer/img/pause.png"));
 		ivPause = new ImageView(imagePause);
 		ivPause.setFitHeight(DEFAULT_ICON_SIZE);
 		ivPause.setFitWidth(DEFAULT_ICON_SIZE);
 
 		// Button restart image.
-		Image imageRestart = new Image(
-				new File("src/main/resources/com/training/fxplayer/img/restart.png").toURI().toString());
+		Image imageRestart = new Image(getClass().getResourceAsStream("/com/training/fxplayer/img/restart.png"));
 		ivRestart = new ImageView(imageRestart);
 		ivRestart.setFitWidth(DEFAULT_ICON_SIZE);
 		ivRestart.setFitHeight(DEFAULT_ICON_SIZE);
 
 		// Button mute image.
-		Image imageMute = new Image(
-				new File("src/main/resources/com/training/fxplayer/img/mute.png").toURI().toString());
+		Image imageMute = new Image(getClass().getResourceAsStream("/com/training/fxplayer/img/mute.png"));
 		ivMute = new ImageView(imageMute);
 		ivMute.setFitWidth(DEFAULT_ICON_SIZE);
 		ivMute.setFitHeight(DEFAULT_ICON_SIZE);
 
 		// Button volume image.
-		Image imageVolume = new Image(
-				new File("src/main/resources/com/training/fxplayer/img/volume.png").toURI().toString());
+		Image imageVolume = new Image(getClass().getResourceAsStream("/com/training/fxplayer/img/volume.png"));
 		ivVolume = new ImageView(imageVolume);
 		ivVolume.setFitWidth(DEFAULT_ICON_SIZE);
 		ivVolume.setFitHeight(DEFAULT_ICON_SIZE);
 
 		// Button forward_30 image.
-		Image imageForward30 = new Image(
-				new File("src/main/resources/com/training/fxplayer/img/forward30.png").toURI().toString());
+		Image imageForward30 = new Image(getClass().getResourceAsStream("/com/training/fxplayer/img/forward30.png"));
 		ivForward30 = new ImageView(imageForward30);
 		ivForward30.setFitWidth(DEFAULT_ICON_SIZE);
 		ivForward30.setFitHeight(DEFAULT_ICON_SIZE);
 
 		// Button replay_10 image.
-		Image imageReplay10 = new Image(
-				new File("src/main/resources/com/training/fxplayer/img/replay10.png").toURI().toString());
+		Image imageReplay10 = new Image(getClass().getResourceAsStream("/com/training/fxplayer/img/replay10.png"));
 		ivReplay10 = new ImageView(imageReplay10);
 		ivReplay10.setFitWidth(DEFAULT_ICON_SIZE);
 		ivReplay10.setFitHeight(DEFAULT_ICON_SIZE);
 
 		// Button open_file image.
-		Image imageOpenFile = new Image(
-				new File("src/main/resources/com/training/fxplayer/img/openFile.png").toURI().toString());
+		Image imageOpenFile = new Image(getClass().getResourceAsStream("/com/training/fxplayer/img/openFile.png"));
 		ivOpenFile = new ImageView(imageOpenFile);
 		ivOpenFile.setFitWidth(DEFAULT_ICON_SIZE);
 		ivOpenFile.setFitHeight(DEFAULT_ICON_SIZE);
