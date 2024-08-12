@@ -10,8 +10,7 @@ import javafx.stage.Stage;
 public class Player extends Application {
 
 	/*
-	 * TODO: 1. open associated files using executable of this app 2. refactoring
-	 * (using custom javafx objects)
+	 * TODO: 1. refactoring (using custom javafx objects)
 	 */
 
 	public static final String APP_NAME = "FX Player";
