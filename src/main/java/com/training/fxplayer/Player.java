@@ -45,6 +45,7 @@ public class Player extends Application {
 		primaryStage.setScene(scene);
 		primaryStage.show();
 
+		// opens the media file that the user has selected to open with this application
 		String[] args = getParameters().getRaw().toArray(new String[0]);
 
 		if (args.length > 0) {
