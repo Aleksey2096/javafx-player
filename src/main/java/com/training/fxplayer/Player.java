@@ -1,5 +1,7 @@
 package com.training.fxplayer;
 
+import java.io.File;
+
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -8,8 +10,7 @@ import javafx.stage.Stage;
 public class Player extends Application {
 
 	/*
-	 * TODO: 1. open associated files using executable of this app 2. refactoring
-	 * (using custom javafx objects)
+	 * TODO: 1. refactoring (using custom javafx objects)
 	 */
 
 	public static final String APP_NAME = "FX Player";
@@ -43,10 +44,17 @@ public class Player extends Application {
 		setAppTitle(APP_NAME);
 		primaryStage.setScene(scene);
 		primaryStage.show();
+
+		// opens the media file that the user has selected to open with this application
+		String[] args = getParameters().getRaw().toArray(new String[0]);
+
+		if (args.length > 0) {
+			playerController.openFile(new File(args[0]));
+		}
 	}
 
 	public static void main(String[] args) {
-		launch();
+		launch(args);
 	}
 
 	public static void setAppTitle(String title) {

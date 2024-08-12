@@ -122,6 +122,10 @@ public class PlayerController implements Initializable {
 	public void handleOpenFileButtonClick(ActionEvent event) {
 		File file = fileSelector.showOpenDialog();
 
+		openFile(file);
+	}
+
+	public void openFile(File file) {
 		if (file != null) {
 			releaseCurrentMediaPlayer();
 

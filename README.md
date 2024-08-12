@@ -38,10 +38,14 @@ $ jpackage
 	--dest jpackage/output_installer 
 	--icon jpackage/icon/player.ico 
 	--module-path D:/Games/Java/javafx-jmods-23 
-	--add-modules javafx.controls,javafx.graphics,javafx.fxml,javafx.base 
+	--add-modules javafx.controls,javafx.graphics,javafx.fxml,javafx.base,javafx.media,java.logging 
 	--win-shortcut
-$ jpackage -t exe --name "FX Player" --app-version 1.0 --input jpackage/input --main-jar fxplayer-0.0.1-SNAPSHOT-shaded.jar --dest jpackage/output_installer --icon jpackage/icon/player.ico --module-path D:/Games/Java/javafx-jmods-23 --add-modules javafx.controls,javafx.graphics,javafx.fxml,javafx.base --win-shortcut
+$ jpackage -t exe --name "FX Player" --app-version 1.0 --input jpackage/input --main-jar fxplayer-0.0.1-SNAPSHOT-shaded.jar --dest jpackage/output_installer --icon jpackage/icon/player.ico --module-path D:/Games/Java/javafx-jmods-23 --add-modules javafx.controls,javafx.graphics,javafx.fxml,javafx.base,javafx.media,java.logging --win-shortcut
 ```
+
+The `java.logging` module was added due to the `jaudiotagger` dependency. Without this module, an exception will be thrown in the thread `JavaFX Application Thread`, resulting in a `java.lang.NoClassDefFoundError: java/util/logging/Logger at org.jaudiotagger.audio.AudioFileIO.<clinit>(AudioFileIO.java:95)`.
+
+The `--win-console` option can be used to keep the console window attached to your application, allowing you to view the console output.
 
 ***
 
