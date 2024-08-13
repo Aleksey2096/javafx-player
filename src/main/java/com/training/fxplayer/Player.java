@@ -10,7 +10,11 @@ import javafx.stage.Stage;
 public class Player extends Application {
 
 	/*
-	 * TODO: 1. refactoring (using custom javafx objects)
+	 * TODO: 1. Investigate the aspect ratio issues with some videos in the Media
+	 * object, as it changes from almost 16:9 to 4:3. 2. Implement functionality to
+	 * resume media playback from where it was last stopped (if the file was played
+	 * before) by using logs with saved data on previously opened files. 3. Refactor
+	 * the code, utilizing custom JavaFX objects.
 	 */
 
 	public static final String APP_NAME = "FX Player";
