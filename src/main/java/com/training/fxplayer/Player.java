@@ -9,13 +9,6 @@ import javafx.stage.Stage;
 
 public class Player extends Application {
 
-	/*
-	 * TODO: 1. Implement functionality to resume media playback from where it was
-	 * last stopped (if the file was played before) by using logs with saved data on
-	 * previously opened files. 2. Refactor the code, utilizing custom JavaFX
-	 * objects.
-	 */
-
 	public static final String APP_NAME = "FX Player";
 	public static final String EMPTY_STRING = "";
 	private static final String FXML_FILE = "player.fxml";
