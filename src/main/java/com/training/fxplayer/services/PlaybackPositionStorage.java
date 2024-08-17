@@ -21,7 +21,7 @@ public class PlaybackPositionStorage implements Serializable {
 	private static final String UNCHECKED_SUPPRESS_WARNING = "unchecked";
 	private static final float PLAYBACK_POSITIONS_LOAD_FACTOR = 0.75f;
 
-	// LinkedHashMap allows to keep entries in access order and limit size
+	// This LinkedHashMap allows to keep entries in access order and limit size
 	private Map<String, Double> playbackPositions = new LinkedHashMap<>(MAX_ENTRIES,
 			PLAYBACK_POSITIONS_LOAD_FACTOR, true) {
 		@Override

@@ -17,6 +17,7 @@ import com.training.fxplayer.gui.buttons.Replay10Button;
 import com.training.fxplayer.gui.buttons.VolumeButton;
 import com.training.fxplayer.gui.views.FXPlayerImageView;
 import com.training.fxplayer.gui.views.FXPlayerMediaView;
+import com.training.fxplayer.services.PlaybackPositionStorage;
 
 import javafx.animation.PauseTransition;
 import javafx.beans.value.ChangeListener;
@@ -49,6 +50,7 @@ public class PlayerController implements Initializable {
 	private static final PauseTransition PAUSE_TRANSITION = new PauseTransition(Duration.millis(200));
 
 	private final FileSelector fileSelector = new FileSelector(Player.getPrimaryStage());
+	private final PlaybackPositionStorage playbackPositionStorage = new PlaybackPositionStorage();
 
 	private MediaPlayer mediaPlayer;
 	private MediaContainer mediaContainer;
@@ -127,7 +129,7 @@ public class PlayerController implements Initializable {
 
 	public void openFile(File file) {
 		if (file != null) {
-			releaseCurrentMediaPlayer();
+			handleCurrentMediaPlayer();
 
 			try {
 				Media media = new Media(file.toURI().toString());
@@ -142,6 +144,14 @@ public class PlayerController implements Initializable {
 						mediaContainer.setAlbumCover(extractAlbumCover(file));
 					} else {
 						mediaContainer.setVisible(MediaContainerElement.MEDIA_VIEW);
+					}
+
+					// Load the last known position
+					Double lastPosition = playbackPositionStorage.getPosition(media.getSource());
+					if (lastPosition != null) {
+						// Rewind by 5 seconds, but not before the start of the media
+						double rewindPosition = Math.max(0, lastPosition - 5);
+						mediaPlayer.seek(Duration.seconds(rewindPosition));
 					}
 				});
 
@@ -180,6 +190,13 @@ public class PlayerController implements Initializable {
 				}
 
 				mediaPlayer.play();
+
+				// Handle window close event
+				Player.getPrimaryStage().setOnCloseRequest(event -> {
+					playbackPositionStorage.savePosition(media.getSource(),
+							mediaPlayer.getCurrentTime().toSeconds());
+					playbackPositionStorage.saveToFile();
+				});
 
 			} catch (MediaException e) {
 				handleMediaException("Unsupported media format.");
@@ -302,18 +319,23 @@ public class PlayerController implements Initializable {
 		}
 	}
 
+	private void handleCurrentMediaPlayer() {
+		if (mediaPlayer != null) {
+			playbackPositionStorage.savePosition(mediaPlayer.getMedia().getSource(),
+					mediaPlayer.getCurrentTime().toSeconds());
+			releaseCurrentMediaPlayer();
+		}
+	}
+
 	private void releaseCurrentMediaPlayer() {
 		try {
-			if (mediaPlayer != null) {
+			// to avoid errors when mediaPlayer is already disposed off but
+			// currentTimeListener is still working
+			mediaPlayer.currentTimeProperty().removeListener(currentTimeListener);
 
-				// to avoid errors when mediaPlayer is already disposed off but
-				// currentTimeListener is still working
-				mediaPlayer.currentTimeProperty().removeListener(currentTimeListener);
-
-				mediaPlayer.stop();
-				mediaPlayer.dispose();
-				mediaPlayer = null;
-			}
+			mediaPlayer.stop();
+			mediaPlayer.dispose();
+			mediaPlayer = null;
 		} catch (NullPointerException e) {
 			// Underlying 'jfxPlayer' was null because previously opened media file was
 			// unsupported.
