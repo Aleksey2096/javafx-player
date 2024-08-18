@@ -67,14 +67,14 @@ Includes jlink and shade plugins and resources for creating native windows insta
 
 Functionalities that are not obvious from the GUI:
 
-- Double-click or press F11 to toggle between full-screen and windowed mode.
-- Press Esc to exit full-screen mode.
+- Double-click or press `F11` to toggle between full-screen and windowed mode.
+- Press `Esc` to exit full-screen mode.
 - Single-click to toggle the visibility of the controls bar.
-- Press the Up arrow key to show the controls bar.
-- Press the Down arrow key to hide the controls bar.
-- Press the Left arrow key to rewind playback by 1 minute.
-- Press the Right arrow key to fast forward playback by 1 minute.
-- Press the Space bar to toggle between PLAYING and PAUSED status or to restart the media after it has finished.
+- Press the `Up arrow` key to show the controls bar.
+- Press the `Down arrow` key to hide the controls bar.
+- Press the `Left arrow` key to rewind playback by 1 minute.
+- Press the `Right arrow` key to fast forward playback by 1 minute.
+- Press the `Space` bar to toggle between `PLAYING` and `PAUSED` status or to restart the media after it has finished.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
