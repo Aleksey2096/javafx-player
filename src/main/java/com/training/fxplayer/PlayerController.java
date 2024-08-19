@@ -352,6 +352,7 @@ public class PlayerController implements Initializable {
 	}
 
 	private void handleMediaException(String errorMessage) {
+		Player.setAppTitle(Player.APP_NAME);
 		resetControlsBar();
 		mediaContainer.displayMessage(errorMessage);
 	}
