@@ -334,8 +334,17 @@ public class PlayerController implements Initializable {
 			case DOWN -> setControlsBarVisibility(false);
 			case LEFT -> adjustPlaybackBySeconds(LEFT_BUTTON_PLAYBACK_ADJUSTMENT);
 			case RIGHT -> adjustPlaybackBySeconds(RIGHT_BUTTON_PLAYBACK_ADJUSTMENT);
-			case SPACE -> handlePlayButtonClick();
+			case SPACE -> {
+				/*
+				 * Prevents the default behavior of the Space key that is commonly used in
+				 * Windows to activate the currently focused button or control
+				 */
+				keyEvent.consume();
+
+				handlePlayButtonClick();
+			}
 			default -> {
+				// Ignore unused key events
 			}
 			}
 		});
@@ -495,6 +504,7 @@ public class PlayerController implements Initializable {
 	}
 
 	private void handleMediaException(String errorMessage) {
+		Player.setAppTitle(Player.APP_NAME);
 		resetControlsBar();
 		displayMessage(errorMessage);
 	}
