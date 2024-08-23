@@ -9,10 +9,6 @@ import javafx.stage.Stage;
 
 public class Player extends Application {
 
-	/*
-	 * TODO: 1. Refactor the code, utilizing custom JavaFX objects.
-	 */
-
 	public static final String APP_NAME = "FX Player";
 	public static final String EMPTY_STRING = "";
 	private static final String FXML_FILE = "player.fxml";

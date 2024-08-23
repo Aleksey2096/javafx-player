@@ -1,15 +1,14 @@
 package com.training.fxplayer;
 
-import static com.training.fxplayer.services.ImageService.extractAlbumCover;
-import static com.training.fxplayer.services.TimeFormatterService.formatTime;
-
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import com.training.fxplayer.domain.MediaState;
+import com.training.fxplayer.gui.FXMediaPlayer;
 import com.training.fxplayer.gui.FileSelector;
 import com.training.fxplayer.gui.MediaContainer;
-import com.training.fxplayer.gui.MediaContainer.MediaContainerElement;
+import com.training.fxplayer.gui.VolumeSlider;
 import com.training.fxplayer.gui.buttons.Forward30Button;
 import com.training.fxplayer.gui.buttons.OpenFileButton;
 import com.training.fxplayer.gui.buttons.PlayButton;
@@ -20,7 +19,6 @@ import com.training.fxplayer.gui.views.FXPlayerMediaView;
 import com.training.fxplayer.services.PlaybackPositionStorage;
 
 import javafx.animation.PauseTransition;
-import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -38,27 +36,22 @@ import javafx.util.Duration;
 
 public class PlayerController implements Initializable {
 
-	private static final double INITIAL_VOLUME = 0.7;
 	private static final int LEFT_BUTTON_PLAYBACK_ADJUSTMENT = -60;
 	private static final int RIGHT_BUTTON_PLAYBACK_ADJUSTMENT = 60;
 	private static final int REPLAY10_BUTTON_PLAYBACK_ADJUSTMENT = -10;
 	private static final int FORWARD30_BUTTON_PLAYBACK_ADJUSTMENT = 30;
 	private static final String APP_TITLE_FORMAT = "%s - %s";
-	private static final String CURRENT_TOTAL_TIME_DELIMITER = " / ";
+	private static final String MEDIA_EXCEPTION_MESSAGE = "Unsupported media format.";
 
 	// Delay to distinguish between single and double click
 	private static final PauseTransition PAUSE_TRANSITION = new PauseTransition(Duration.millis(200));
 
 	private final FileSelector fileSelector = new FileSelector(Player.getPrimaryStage());
 	private final PlaybackPositionStorage playbackPositionStorage = new PlaybackPositionStorage();
+	private final MediaState mediaState = new MediaState();
 
-	private MediaPlayer mediaPlayer;
+	private FXMediaPlayer fxMediaPlayer;
 	private MediaContainer mediaContainer;
-	private boolean isEndOfMedia = false;
-	private double previousVolume = INITIAL_VOLUME;
-	private boolean isMuted = false;
-
-	private ChangeListener<Duration> currentTimeListener;
 
 	@FXML
 	private VBox controlsBox;
@@ -71,7 +64,7 @@ public class PlayerController implements Initializable {
 	@FXML
 	private Slider progressSlider;
 	@FXML
-	private Slider volumeSlider;
+	private VolumeSlider volumeSlider;
 	@FXML
 	private PlayButton playButton;
 	@FXML
@@ -96,28 +89,22 @@ public class PlayerController implements Initializable {
 
 		mediaContainer = new MediaContainer(mediaView, imageView, messageLabel);
 
+		volumeSlider.setValue(mediaState.getPreviousVolume());
 		volumeSlider.valueProperty().addListener(observable -> {
-			if (mediaPlayer != null) {
-				double newVolume = volumeSlider.getValue();
-				mediaPlayer.setVolume(newVolume);
+			double newVolume = volumeSlider.getValue();
+			fxMediaPlayer.setVolume(newVolume);
 
-				if (newVolume != 0.0) {
-					volumeButton.setImage(VolumeButton.VOLUME_BUTTON_IMAGE);
-					previousVolume = newVolume;
-					isMuted = false;
-				} else {
-					volumeButton.setImage(VolumeButton.MUTE_BUTTON_IMAGE);
-					isMuted = true;
-				}
+			if (newVolume != 0.0) {
+				volumeButton.setImage(VolumeButton.VOLUME_BUTTON_IMAGE);
+				mediaState.setPreviousVolume(newVolume);
+				mediaState.setMuted(false);
+			} else {
+				volumeButton.setImage(VolumeButton.MUTE_BUTTON_IMAGE);
+				mediaState.setMuted(true);
 			}
 		});
 
-		volumeSlider.setValue(previousVolume);
-
 		setDisableControls(true);
-
-		volumeSlider.setVisible(false);
-		volumeSlider.setManaged(false);
 	}
 
 	@FXML
@@ -129,77 +116,29 @@ public class PlayerController implements Initializable {
 
 	public void openFile(File file) {
 		if (file != null) {
-			handleCurrentMediaPlayer();
+			if (fxMediaPlayer != null) {
+				fxMediaPlayer.handleCurrentMediaPlayer();
+			}
 
 			try {
 				Media media = new Media(file.toURI().toString());
-				mediaPlayer = new MediaPlayer(media);
-				mediaContainer.setMediaPlayer(mediaPlayer);
+				fxMediaPlayer = new FXMediaPlayer(media, mediaState, playbackPositionStorage);
+				mediaContainer.setMediaPlayer(fxMediaPlayer.retrieveMediaPlayer());
 
-				mediaPlayer.setOnReady(() -> {
-					progressSlider.setMax(media.getDuration().toSeconds());
-
-					// Check if the file is audio or video
-					if (file.getName().endsWith(".mp3") || file.getName().endsWith(".m4a")) {
-						mediaContainer.setAlbumCover(extractAlbumCover(file));
-					} else {
-						mediaContainer.setVisible(MediaContainerElement.MEDIA_VIEW);
-					}
-
-					// Load the last known position
-					Double lastPosition = playbackPositionStorage.getPosition(media.getSource());
-					if (lastPosition != null) {
-						// Rewind by 5 seconds, but not before the start of the media
-						double rewindPosition = Math.max(0, lastPosition - 5);
-						mediaPlayer.seek(Duration.seconds(rewindPosition));
-					}
-				});
-
-				mediaPlayer.setOnEndOfMedia(() -> {
-					playButton.setImage(PlayButton.RESTART_BUTTON_IMAGE);
-					isEndOfMedia = true;
-				});
-
-				currentTimeListener = (observable, oldValue, newValue) -> {
-					currentTimeLabel.setText(formatTime(mediaPlayer.getCurrentTime()) + CURRENT_TOTAL_TIME_DELIMITER);
-
-					progressSlider.setValue(newValue.toSeconds());
-
-					// changes restart icon to play icon if the user selected another playback time
-					// after the media has ended
-					if (newValue.toSeconds() < media.getDuration().toSeconds() && isEndOfMedia) {
-						playButton.setImage(PlayButton.PLAY_BUTTON_IMAGE);
-						isEndOfMedia = false;
-					}
-				};
-
-				mediaPlayer.currentTimeProperty().addListener(currentTimeListener);
-
-				mediaPlayer.totalDurationProperty().addListener((observable, oldValue, newValue) -> {
-					durationLabel.setText(formatTime(mediaPlayer.getTotalDuration()));
-				});
+				fxMediaPlayer.setOnReadyEventHandler(progressSlider, mediaContainer, file);
+				fxMediaPlayer.setOnEndOfMediaEventHandler(playButton);
+				fxMediaPlayer.addCurrentTimeListener(currentTimeLabel, progressSlider, playButton);
+				fxMediaPlayer.addTotalDurationListener(durationLabel);
 
 				Player.setAppTitle(String.format(APP_TITLE_FORMAT, Player.APP_NAME, file.getName()));
 				playButton.setImage(PlayButton.PAUSE_BUTTON_IMAGE);
 				setDisableControls(false);
 
-				if (isMuted) {
-					mediaPlayer.setVolume(0);
-				} else {
-					mediaPlayer.setVolume(previousVolume);
-				}
-
-				mediaPlayer.play();
-
 				// Handle window close event
-				Player.getPrimaryStage().setOnCloseRequest(event -> {
-					playbackPositionStorage.savePosition(media.getSource(),
-							mediaPlayer.getCurrentTime().toSeconds());
-					playbackPositionStorage.saveToFile();
-				});
+				Player.getPrimaryStage().setOnCloseRequest(fxMediaPlayer.createSetOnCloseEventHandler());
 
 			} catch (MediaException e) {
-				handleMediaException("Unsupported media format.");
+				handleMediaException(MEDIA_EXCEPTION_MESSAGE);
 			}
 		}
 	}
@@ -211,48 +150,46 @@ public class PlayerController implements Initializable {
 
 	@FXML
 	public void handleForward30ButtonClick(ActionEvent event) {
-		mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(FORWARD30_BUTTON_PLAYBACK_ADJUSTMENT)));
+		fxMediaPlayer.adjustPlaybackBySeconds(FORWARD30_BUTTON_PLAYBACK_ADJUSTMENT);
 	}
 
 	@FXML
 	public void handleReplay10ButtonClick(ActionEvent event) {
-		mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(REPLAY10_BUTTON_PLAYBACK_ADJUSTMENT)));
+		fxMediaPlayer.adjustPlaybackBySeconds(REPLAY10_BUTTON_PLAYBACK_ADJUSTMENT);
 	}
 
 	@FXML
 	public void handleVolumeButtonClick(ActionEvent event) {
-		if (isMuted) {
+		if (mediaState.isMuted()) {
 			volumeButton.setImage(VolumeButton.VOLUME_BUTTON_IMAGE);
-			volumeSlider.setValue(previousVolume);
-			isMuted = false;
+			volumeSlider.setValue(mediaState.getPreviousVolume());
+			mediaState.setMuted(false);
 		} else {
 			volumeButton.setImage(VolumeButton.MUTE_BUTTON_IMAGE);
 			volumeSlider.setValue(0);
-			isMuted = true;
+			mediaState.setMuted(true);
 		}
 	}
 
 	@FXML
 	public void handleMouseEnteringVolumeButton(MouseEvent event) {
 		if (!volumeSlider.isVisible()) {
-			volumeSlider.setVisible(true);
-			volumeSlider.setManaged(true);
+			volumeSlider.setVisibility(true);
 		}
 	}
 
 	@FXML
 	public void handleMouseExitingVolumeControlsHBox(MouseEvent event) {
-		volumeSlider.setVisible(false);
-		volumeSlider.setManaged(false);
+		volumeSlider.setVisibility(false);
 	}
 
 	@FXML
 	public void handleProgressSliderOnMousePressedAndDragged(MouseEvent event) {
-		mediaPlayer.seek(Duration.seconds(progressSlider.getValue()));
+		fxMediaPlayer.seek(Duration.seconds(progressSlider.getValue()));
 
 		// to prevent the media from automatically playing if it has already ended
-		if (isEndOfMedia) {
-			mediaPlayer.pause();
+		if (mediaState.isEndOfMedia()) {
+			fxMediaPlayer.pause();
 		}
 	}
 
@@ -277,8 +214,16 @@ public class PlayerController implements Initializable {
 			case F11 -> Player.toggleFullScreen();
 			case UP -> setControlsBarVisibility(true);
 			case DOWN -> setControlsBarVisibility(false);
-			case LEFT -> adjustPlaybackBySeconds(LEFT_BUTTON_PLAYBACK_ADJUSTMENT);
-			case RIGHT -> adjustPlaybackBySeconds(RIGHT_BUTTON_PLAYBACK_ADJUSTMENT);
+			case LEFT -> {
+				if (fxMediaPlayer != null) {
+					fxMediaPlayer.adjustPlaybackBySeconds(LEFT_BUTTON_PLAYBACK_ADJUSTMENT);
+				}
+			}
+			case RIGHT -> {
+				if (fxMediaPlayer != null) {
+					fxMediaPlayer.adjustPlaybackBySeconds(RIGHT_BUTTON_PLAYBACK_ADJUSTMENT);
+				}
+			}
 			case SPACE -> {
 				/*
 				 * Prevents the default behavior of the Space key that is commonly used in
@@ -305,49 +250,20 @@ public class PlayerController implements Initializable {
 		controlsBox.setManaged(isVisible);
 	}
 
-	private void adjustPlaybackBySeconds(int seconds) {
-		if (mediaPlayer != null) {
-			mediaPlayer.seek(mediaPlayer.getCurrentTime().add(Duration.seconds(seconds)));
-		}
-	}
-
 	private void handlePlayButtonClick() {
-		if (mediaPlayer != null) {
-			if (isEndOfMedia) {
-				isEndOfMedia = false;
-				mediaPlayer.seek(Duration.ZERO);
-				mediaPlayer.play();
+		if (fxMediaPlayer != null && !fxMediaPlayer.isInternalPlayerNull()) {
+			if (mediaState.isEndOfMedia()) {
+				mediaState.setEndOfMedia(false);
+				fxMediaPlayer.seek(Duration.ZERO);
+				fxMediaPlayer.play();
 				playButton.setImage(PlayButton.PAUSE_BUTTON_IMAGE);
-			} else if (mediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
-				mediaPlayer.pause();
+			} else if (fxMediaPlayer.getStatus() == MediaPlayer.Status.PLAYING) {
+				fxMediaPlayer.pause();
 				playButton.setImage(PlayButton.PLAY_BUTTON_IMAGE);
 			} else {
-				mediaPlayer.play();
+				fxMediaPlayer.play();
 				playButton.setImage(PlayButton.PAUSE_BUTTON_IMAGE);
 			}
-		}
-	}
-
-	private void handleCurrentMediaPlayer() {
-		if (mediaPlayer != null) {
-			playbackPositionStorage.savePosition(mediaPlayer.getMedia().getSource(),
-					mediaPlayer.getCurrentTime().toSeconds());
-			releaseCurrentMediaPlayer();
-		}
-	}
-
-	private void releaseCurrentMediaPlayer() {
-		try {
-			// to avoid errors when mediaPlayer is already disposed off but
-			// currentTimeListener is still working
-			mediaPlayer.currentTimeProperty().removeListener(currentTimeListener);
-
-			mediaPlayer.stop();
-			mediaPlayer.dispose();
-			mediaPlayer = null;
-		} catch (NullPointerException e) {
-			// Underlying 'jfxPlayer' was null because previously opened media file was
-			// unsupported.
 		}
 	}
 

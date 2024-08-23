@@ -6,6 +6,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import com.training.fxplayer.gui.VolumeSlider?>
 <?import com.training.fxplayer.gui.views.FXPlayerMediaView?>
 <?import com.training.fxplayer.gui.views.FXPlayerImageView?>
 <?import com.training.fxplayer.gui.buttons.Replay10Button?>
@@ -36,7 +37,7 @@
                   <HBox fx:id="volumeControlsHBox" alignment="CENTER_LEFT" onMouseExited="#handleMouseExitingVolumeControlsHBox" prefHeight="100.0" prefWidth="200.0">
                      <children>
                      	<VolumeButton fx:id="volumeButton" mnemonicParsing="false" onAction="#handleVolumeButtonClick" onMouseEntered="#handleMouseEnteringVolumeButton" style="-fx-cursor: hand;" styleClass="transparent-button" />
-                        <Slider fx:id="volumeSlider" blockIncrement="0.1" max="1.0" style="-fx-cursor: hand;" />
+                        <VolumeSlider fx:id="volumeSlider" blockIncrement="0.1" max="1.0" style="-fx-cursor: hand;" />
                      </children>
                   </HBox>
                   <HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
