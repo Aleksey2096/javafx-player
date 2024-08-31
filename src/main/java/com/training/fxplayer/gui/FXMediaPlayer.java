@@ -5,6 +5,7 @@ import static com.training.fxplayer.services.TimeFormatterService.formatTime;
 
 import java.io.File;
 
+import com.training.fxplayer.PlayerController;
 import com.training.fxplayer.domain.MediaState;
 import com.training.fxplayer.gui.MediaContainer.MediaContainerElement;
 import com.training.fxplayer.gui.buttons.PlayButton;
@@ -25,6 +26,7 @@ public class FXMediaPlayer {
 	private static final String CURRENT_TOTAL_TIME_DELIMITER = " / ";
 	private static final String MP3_EXTENSION = ".mp3";
 	private static final String M4A_EXTENSION = ".m4a";
+	private static final String COLON = ":";
 	private static final int REWIND_TIME = 5;
 
 	private MediaPlayer mediaPlayer;
@@ -93,6 +95,20 @@ public class FXMediaPlayer {
 		mediaPlayer.setOnEndOfMedia(() -> {
 			playButton.setImage(PlayButton.RESTART_BUTTON_IMAGE);
 			mediaState.setEndOfMedia(true);
+		});
+	}
+
+	public void setOnErrorEventHandler(PlayerController playerController) {
+		mediaPlayer.setOnError(() -> {
+			String errorMessage = mediaPlayer.getError().getMessage();
+
+			// removes unwanted prefix
+			int index = errorMessage.lastIndexOf(COLON);
+			if (index != -1) {
+				errorMessage = errorMessage.substring(index + 1).trim();
+			}
+
+			playerController.handleMediaException(errorMessage);
 		});
 	}
 

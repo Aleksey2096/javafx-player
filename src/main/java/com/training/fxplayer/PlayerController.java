@@ -127,6 +127,7 @@ public class PlayerController implements Initializable {
 
 				fxMediaPlayer.setOnReadyEventHandler(progressSlider, mediaContainer, file);
 				fxMediaPlayer.setOnEndOfMediaEventHandler(playButton);
+				fxMediaPlayer.setOnErrorEventHandler(this);
 				fxMediaPlayer.addCurrentTimeListener(currentTimeLabel, progressSlider, playButton);
 				fxMediaPlayer.addTotalDurationListener(durationLabel);
 
@@ -240,6 +241,12 @@ public class PlayerController implements Initializable {
 		});
 	}
 
+	public void handleMediaException(String errorMessage) {
+		Player.setAppTitle(Player.APP_NAME);
+		resetControlsBar();
+		mediaContainer.displayMessage(errorMessage);
+	}
+
 	private void toggleControlsBarVisibility() {
 		controlsBox.setVisible(!controlsBox.isVisible());
 		controlsBox.setManaged(!controlsBox.isManaged());
@@ -265,12 +272,6 @@ public class PlayerController implements Initializable {
 				playButton.setImage(PlayButton.PAUSE_BUTTON_IMAGE);
 			}
 		}
-	}
-
-	private void handleMediaException(String errorMessage) {
-		Player.setAppTitle(Player.APP_NAME);
-		resetControlsBar();
-		mediaContainer.displayMessage(errorMessage);
 	}
 
 	private void resetControlsBar() {
