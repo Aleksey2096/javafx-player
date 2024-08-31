@@ -53,6 +53,7 @@ public class PlayerController implements Initializable {
 	private static final String CURRENT_TOTAL_TIME_DELIMITER = " / ";
 	private static final String WIDTH_PROPERTY = "width";
 	private static final String HEIGHT_PROPERTY = "height";
+	private static final String COLON = ":";
 
 	// Delay to distinguish between single and double click
 	private static final PauseTransition PAUSE_TRANSITION = new PauseTransition(Duration.millis(200));
@@ -215,6 +216,16 @@ public class PlayerController implements Initializable {
 					isEndOfMedia = true;
 				});
 
+				mediaPlayer.setOnError(() -> {
+					String errorMessage = mediaPlayer.getError().getMessage();
+					// removes unwanted prefix
+					int index = errorMessage.lastIndexOf(COLON);
+					if (index != -1) {
+						errorMessage = errorMessage.substring(index + 1).trim();
+					}
+					handleMediaException(errorMessage);
+				});
+
 				currentTimeListener = (observable, oldValue, newValue) -> {
 					currentTimeLabel.setText(formatTime(mediaPlayer.getCurrentTime()) + CURRENT_TOTAL_TIME_DELIMITER);
 
@@ -257,6 +268,7 @@ public class PlayerController implements Initializable {
 				handleMediaException("Unsupported media format.");
 			}
 		}
+
 	}
 
 	@FXML
