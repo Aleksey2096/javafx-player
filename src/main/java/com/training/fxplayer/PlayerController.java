@@ -223,6 +223,7 @@ public class PlayerController implements Initializable {
 					if (index != -1) {
 						errorMessage = errorMessage.substring(index + 1).trim();
 					}
+					releaseCurrentMediaPlayer();
 					handleMediaException(errorMessage);
 				});
 
@@ -259,8 +260,10 @@ public class PlayerController implements Initializable {
 
 				// Handle window close event
 				Player.getPrimaryStage().setOnCloseRequest(event -> {
-					playbackPositionStorage.savePosition(media.getSource(),
-							mediaPlayer.getCurrentTime().toSeconds());
+					if (mediaPlayer != null) {
+						playbackPositionStorage.savePosition(media.getSource(),
+								mediaPlayer.getCurrentTime().toSeconds());
+					}
 					playbackPositionStorage.saveToFile();
 				});
 
