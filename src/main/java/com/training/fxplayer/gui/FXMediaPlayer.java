@@ -108,6 +108,9 @@ public class FXMediaPlayer {
 				errorMessage = errorMessage.substring(index + 1).trim();
 			}
 
+			// to avoid playing just video when audio format is unsupported
+			releaseCurrentMediaPlayer();
+
 			playerController.handleMediaException(errorMessage);
 		});
 	}
@@ -137,7 +140,9 @@ public class FXMediaPlayer {
 
 	public EventHandler<WindowEvent> createSetOnCloseEventHandler() {
 		return event -> {
-			playbackPositionStorage.savePosition(media.getSource(), mediaPlayer.getCurrentTime().toSeconds());
+			if (mediaPlayer != null) {
+				playbackPositionStorage.savePosition(media.getSource(), mediaPlayer.getCurrentTime().toSeconds());
+			}
 			playbackPositionStorage.saveToFile();
 		};
 	}
