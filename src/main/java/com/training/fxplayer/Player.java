@@ -1,15 +1,19 @@
 package com.training.fxplayer;
 
+import static com.training.fxplayer.services.ImageService.loadResourceImage;
+
 import java.io.File;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 public class Player extends Application {
 
 	public static final String APP_NAME = "FX Player";
+	private static final Image APP_ICON = loadResourceImage("/com/training/fxplayer/img/player.png");
 	public static final String EMPTY_STRING = "";
 	private static final String FXML_FILE = "player.fxml";
 	private static final int INITIAL_APP_WIDTH = 960;
@@ -38,6 +42,7 @@ public class Player extends Application {
 		primaryStage.setAlwaysOnTop(true);
 
 		setAppTitle(APP_NAME);
+		primaryStage.getIcons().add(APP_ICON);
 		primaryStage.setScene(scene);
 
 		// opens the media file that the user has selected to open with this application
